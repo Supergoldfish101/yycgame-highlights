@@ -1,130 +1,1485 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fishbowl Photography Game Highlights</title>
-<meta name="description" content="Live photo gallery fed from a Google Drive folder.">
-<meta name="theme-color" content="#0f1115">
+<title>Fishbowl Photography — Game Highlights</title>
+<meta name="description" content="Live game-day sports photography highlights by Fishbowl Photography (YYC). Action frames streaming straight from the sideline.">
+<meta name="theme-color" content="#090b10" id="themeColorMeta">
+<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+
+<!-- Open Graph / Social Preview -->
+<meta property="og:title" content="Fishbowl Photography — Game Highlights">
+<meta property="og:description" content="Live game-day sports photography highlights by Fishbowl Photography (YYC). Tap any frame to view full-res, save, or share.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yycgame.l33.ca">
+<meta property="og:image" content="https://yycgame.l33.ca/assets/og-card.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fishbowl Photography — Game Highlights">
+<meta name="twitter:description" content="Live game-day sports photography highlights by Fishbowl Photography (YYC).">
+<meta name="twitter:image" content="https://yycgame.l33.ca/assets/og-card.jpg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+<script>
+  try {
+    const t = localStorage.getItem("fp_theme");
+    if (t === "light" || t === "dark") {
+      document.documentElement.dataset.theme = t;
+      const m = document.getElementById("themeColorMeta");
+      if (m) m.content = t === "light" ? "#f4f6fa" : "#090b10";
+    }
+  } catch {}
+</script>
+
 <style>
-  :root {
-    --bg: #0f1115;
-    --panel: #171a21;
-    --panel-2: #1f232c;
-    --text: #e8eaef;
-    --muted: #9aa3b2;
+  :root,
+  [data-theme="dark"] {
+    --bg: #090b10;
+    --surface: #11151e;
+    --surface-2: #171c28;
+    --text: #f4f6fa;
+    --muted: #94a0b8;
     --accent: #ffb020;
-    --accent-ink: #1a1200;
-    --border: #2a2f3a;
-    --radius: 12px;
-    --gap: 8px;
+    --accent-2: #ff7a18;
+    --accent-ink: #160f00;
+    --cyan: #22d3ee;
+    --live: #34d399;
+    --danger: #ff6b6b;
+    --border: rgba(255, 255, 255, 0.09);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --glass: rgba(9, 11, 16, 0.80);
+    --tile-shadow: 0 12px 30px rgba(0, 0, 0, 0.42);
+    --shimmer-1: #161b26;
+    --shimmer-2: #212838;
   }
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-      --bg: #f5f6f8; --panel: #ffffff; --panel-2: #eef0f4; --text: #15181e;
-      --muted: #5c6573; --border: #d9dde5;
+
+  [data-theme="light"] {
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --surface-2: #e9edf4;
+    --text: #0f131a;
+    --muted: #5a6478;
+    --border: rgba(15, 19, 26, 0.11);
+    --border-strong: rgba(15, 19, 26, 0.20);
+    --glass: rgba(244, 246, 250, 0.85);
+    --tile-shadow: 0 10px 24px rgba(15, 19, 26, 0.10);
+    --shimmer-1: #e4e8f0;
+    --shimmer-2: #eef1f7;
+  }
+
+  :root {
+    --radius: 14px;
+    --gap: 10px;
+    --topbar-h: 62px;
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-display: "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  #top, #contact { scroll-margin-top: 80px; }
+  html, body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: clip;
+  }
+
+  body {
+    background-image:
+      radial-gradient(900px 420px at 12% -120px, rgba(255, 176, 32, 0.08), transparent 65%),
+      radial-gradient(800px 400px at 88% -80px, rgba(34, 211, 238, 0.07), transparent 65%);
+    background-repeat: no-repeat;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-inline: 16px;
+  }
+
+  /* ---------------- Top Navbar ---------------- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border);
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding-block: 8px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex-shrink: 0;
+  }
+
+  .brand-mark {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(255, 176, 32, 0.18));
+    transition: transform .25s ease;
+  }
+  .brand:hover .brand-mark { transform: scale(1.06) rotate(-3deg); }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+  .brand-main {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .brand-sub {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .spacer { flex: 1; }
+
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 6px 4px 11px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--live);
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.65);
+    animation: pulse 2.2s infinite;
+    flex-shrink: 0;
+  }
+  .dot.off {
+    background: var(--danger);
+    animation: none;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.55);
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.65); }
+    70% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+  }
+
+  .mini-refresh {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 0;
+    background: var(--surface-2);
+    color: var(--text);
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  .mini-refresh:hover { background: var(--accent); color: var(--accent-ink); }
+  .mini-refresh.spinning svg { animation: rot .7s linear infinite; }
+
+  .nav-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+  }
+  .nav-pill:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-2);
+    transform: translateY(-1px);
+  }
+  .ig-pill:hover {
+    border-color: rgba(255, 176, 32, 0.5);
+  }
+
+  .icon-btn {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color .2s ease, background .2s ease;
+  }
+  .icon-btn:hover { border-color: var(--border-strong); background: var(--surface-2); }
+
+  .icon-sun { display: none; }
+  [data-theme="light"] .icon-sun { display: block; }
+  [data-theme="light"] .icon-moon { display: none; }
+
+  @media (max-width: 720px) {
+    .nav-pill .pill-label { display: none; }
+    .nav-pill { width: 34px; padding: 0; justify-content: center; }
+  }
+  @media (max-width: 480px) {
+    .container { padding-inline: 12px; }
+    .topbar-inner { gap: 6px; min-height: 54px; }
+    .brand { gap: 7px; }
+    .brand-mark { width: 28px; height: 28px; }
+    .brand-main { font-size: 14px; }
+    .brand-sub { display: none; }
+    .nav-actions { gap: 5px; }
+    .nav-contact { display: none; }
+    .live-pill { padding: 3px 3px 3px 8px; gap: 5px; font-size: 10.5px; }
+    .mini-refresh { width: 24px; height: 24px; }
+    .nav-pill, .icon-btn { width: 30px; height: 30px; }
+  }
+
+  /* ---------------- Compact Editorial Hero ---------------- */
+  .hero-wrap {
+    padding-top: 14px;
+    padding-bottom: 10px;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    background: #0b0e14;
+    color: #f4f6fa;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    padding: 22px 26px;
+    min-height: 200px;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
+  }
+
+  @media (min-width: 860px) {
+    .hero {
+      grid-template-columns: 1.35fr 0.65fr;
+      padding: 24px 32px;
+      min-height: 224px;
     }
   }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--text);
-    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  a { color: inherit; }
 
-  header {
-    position: sticky; top: 0; z-index: 5;
-    background: color-mix(in srgb, var(--bg) 88%, transparent);
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
-    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    opacity: 0.9;
+    pointer-events: none;
+    user-select: none;
   }
-  .bar { display: flex; align-items: center; gap: 12px; max-width: 1400px; margin: 0 auto; }
-  h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: .2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #3ecf8e; box-shadow: 0 0 0 0 rgba(62,207,142,.6); animation: pulse 2s infinite; }
-  .dot.off { background: #c0392b; animation: none; }
-  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(62,207,142,.6);} 70% { box-shadow: 0 0 0 8px rgba(62,207,142,0);} 100% { box-shadow: 0 0 0 0 rgba(62,207,142,0);} }
-  .spacer { flex: 1; }
-  .count { font-size: 12px; color: var(--muted); white-space: nowrap; }
 
-  .tabs { display: flex; gap: 6px; overflow-x: auto; max-width: 1400px; margin: 10px auto 0; scrollbar-width: none; }
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(96deg, rgba(9, 11, 16, 0.96) 0%, rgba(9, 11, 16, 0.85) 50%, rgba(9, 11, 16, 0.42) 100%),
+      linear-gradient(180deg, rgba(9, 11, 16, 0.15) 0%, rgba(9, 11, 16, 0.65) 100%);
+    pointer-events: none;
+  }
+
+  /* Camera viewfinder corner brackets */
+  .vf-corner {
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    opacity: 0.7;
+    z-index: 2;
+  }
+  .vf-corner.tl { top: 12px; left: 12px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); border-top-left-radius: 4px; }
+  .vf-corner.tr { top: 12px; right: 12px; border-top: 2px solid rgba(34, 211, 238, 0.75); border-right: 2px solid rgba(34, 211, 238, 0.75); border-top-right-radius: 4px; }
+  .vf-corner.bl { bottom: 12px; left: 12px; border-bottom: 2px solid rgba(255, 255, 255, 0.28); border-left: 2px solid rgba(255, 255, 255, 0.28); border-bottom-left-radius: 4px; }
+  .vf-corner.br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); border-bottom-right-radius: 4px; }
+
+  .hero-copy {
+    position: relative;
+    z-index: 2;
+    max-width: 680px;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    background: rgba(34, 211, 238, 0.10);
+    border: 1px solid rgba(34, 211, 238, 0.24);
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .eyebrow-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+  }
+
+  .hero h1 {
+    margin: 10px 0 6px;
+    font-family: var(--font-display);
+    font-size: clamp(24px, 3.3vw, 38px);
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+  }
+  .hero h1 .hl {
+    background: linear-gradient(110deg, #ffd166 0%, #ffb020 55%, #ff7a18 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .hero-sub {
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: #c2cad9;
+    max-width: 560px;
+  }
+
+  .hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-ig {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 15px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-ink);
+    background: linear-gradient(120deg, #ffd166 0%, var(--accent) 55%, var(--accent-2) 100%);
+    box-shadow: 0 8px 20px rgba(255, 176, 32, 0.26);
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .btn-ig:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(255, 176, 32, 0.38);
+  }
+
+  .email-group {
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+  }
+  .email-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 100%;
+    padding: 0 10px 0 13px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #f4f6fa;
+    transition: background .2s ease;
+  }
+  .email-link:hover { background: rgba(255, 255, 255, 0.08); }
+
+  .copy-icon-btn {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 100%;
+    border: 0;
+    border-left: 1px solid rgba(255, 255, 255, 0.14);
+    background: transparent;
+    color: #c2cad9;
+    cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  .copy-icon-btn:hover { background: rgba(255, 255, 255, 0.12); color: #ffffff; }
+  .copy-icon-btn.copied { color: var(--live); }
+
+  /* Right-side Hero Viewfinder Graphic */
+  .hero-visual {
+    display: none;
+    position: relative;
+    z-index: 2;
+    justify-content: center;
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .hero-visual { display: flex; }
+  }
+  .reticle-svg {
+    width: 100%;
+    max-width: 248px;
+    height: auto;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.45));
+  }
+  .aperture-ring {
+    transform-origin: 130px 108px;
+    animation: slowspin 34s linear infinite;
+  }
+  @keyframes slowspin { to { transform: rotate(360deg); } }
+
+  /* ---------------- Sticky Gallery Controls Bar ---------------- */
+  .controls-bar {
+    position: sticky;
+    top: var(--topbar-h, 62px);
+    z-index: 6;
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-top: 6px;
+  }
+
+  .controls-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-block: 10px;
+    min-height: 52px;
+  }
+
+  .tabs {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+    min-width: 0;
+    padding-right: 16px;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 20px), transparent 100%);
+  }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab { flex: 0 0 auto; border: 1px solid var(--border); background: var(--panel); color: var(--text);
-    padding: 6px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; }
-  .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+  .tabs[hidden] { display: none; }
+  @media (max-width: 520px) {
+    .controls-inner { gap: 8px; }
+    .tab { padding: 5px 10px; font-size: 12.5px; gap: 5px; }
+  }
 
-  main { max-width: 1400px; margin: 0 auto; padding: 12px 16px calc(24px + env(safe-area-inset-bottom)); }
-  .grid { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-  @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
-  .tile { position: relative; aspect-ratio: 3 / 2; background: var(--panel-2); border-radius: var(--radius); overflow: hidden; cursor: pointer; border: 0; padding: 0; }
-  .tile img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .35s ease; }
+  .feed-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease, transform .15s ease;
+  }
+  .tab:hover { border-color: var(--border-strong); background: var(--surface-2); }
+  .tab .tab-n {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--muted);
+  }
+  .tab[aria-selected="true"] {
+    background: linear-gradient(120deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: var(--accent-ink);
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .tab[aria-selected="true"] .tab-n {
+    background: rgba(22, 15, 0, 0.18);
+    color: var(--accent-ink);
+  }
+
+  .controls-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .count {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .density-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 11px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color .2s ease, color .2s ease, background .2s ease;
+  }
+  .density-btn:hover { border-color: var(--border-strong); color: var(--text); }
+  .density-btn[aria-pressed="true"] {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(255, 176, 32, 0.10);
+  }
+  @media (max-width: 520px) {
+    .density-btn span { display: none; }
+    .density-btn { width: 32px; padding: 0; justify-content: center; }
+  }
+
+  /* ---------------- Photo Grid ---------------- */
+  .gallery-main {
+    padding-top: 16px;
+    padding-bottom: 36px;
+  }
+
+  .grid {
+    display: grid;
+    gap: var(--gap);
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+  }
+  .grid.large { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  @media (min-width: 700px) {
+    :root { --gap: 12px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+    .grid.large { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+  }
+
+  .tile {
+    position: relative;
+    aspect-ratio: 3 / 2;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    padding: 0;
+    transition: border-color .25s ease, box-shadow .25s ease, transform .25s ease;
+  }
+
+  .tile::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, var(--shimmer-1) 25%, var(--shimmer-2) 45%, var(--shimmer-1) 65%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+  .tile.is-loaded::before { display: none; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 25%;
+    display: block;
+    opacity: 0;
+    transition: opacity .35s ease, transform .4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
   .tile img.loaded { opacity: 1; }
-  .tile.new::after { content: "NEW"; position: absolute; top: 8px; left: 8px; background: var(--accent); color: var(--accent-ink);
-    font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; letter-spacing: .5px; }
-  .tile .time { position: absolute; right: 6px; bottom: 6px; font-size: 11px; color: #fff; background: rgba(0,0,0,.55); padding: 2px 6px; border-radius: 6px; }
 
-  .empty, .error { text-align: center; color: var(--muted); padding: 60px 16px; }
-  .error { color: #ff7b7b; }
-  .error code { display: block; margin-top: 10px; color: var(--muted); font-size: 12px; word-break: break-all; }
+  .tile-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+    opacity: 0.72;
+    transition: opacity .25s ease;
+    pointer-events: none;
+  }
 
-  .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
-    background: var(--accent); color: var(--accent-ink); font-weight: 600; padding: 10px 16px; border-radius: 999px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: all .3s ease; z-index: 8; cursor: pointer; }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .tile:hover,
+  .tile:focus-visible {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), var(--tile-shadow);
+    transform: translateY(-2px);
+  }
+  .tile:hover img { transform: scale(1.045); }
+  .tile:hover .tile-scrim { opacity: 1; }
 
-  /* Lightbox */
-  .lb { position: fixed; inset: 0; background: rgba(0,0,0,.96); display: none; z-index: 20; flex-direction: column; touch-action: none; }
+  .tile-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: linear-gradient(120deg, #ffd166 0%, var(--accent) 100%);
+    color: var(--accent-ink);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.06em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+  }
+  .tile-badge::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent-ink);
+  }
+
+  .tile .time {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: #f4f6fa;
+    background: rgba(9, 11, 16, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    padding: 2px 7px;
+    border-radius: 6px;
+    pointer-events: none;
+  }
+
+  /* ---------------- Empty & Error State Cards ---------------- */
+  .state-card {
+    margin: 24px auto;
+    max-width: 500px;
+    padding: 38px 24px;
+    border-radius: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .state-card svg { display: block; margin: 0 auto 14px; }
+  .state-card h2 {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-size: 20px;
+  }
+  .state-card p {
+    margin: 0 auto;
+    max-width: 380px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .state-card.is-error { border-color: rgba(255, 107, 107, 0.32); }
+  .state-card.is-error h2 { color: var(--danger); }
+  .state-card code {
+    display: block;
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--surface-2);
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    word-break: break-word;
+  }
+  .retry-btn {
+    margin-top: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 0;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* ---------------- Toast ---------------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(20px);
+    background: linear-gradient(120deg, #ffd166 0%, var(--accent) 100%);
+    color: var(--accent-ink);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+    opacity: 0;
+    pointer-events: none;
+    transition: all .28s ease;
+    z-index: 30;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+
+  /* ---------------- Branded Studio Contact Footer ---------------- */
+  .site-footer {
+    padding-top: 8px;
+    padding-bottom: calc(28px + env(safe-area-inset-bottom));
+  }
+
+  .contact-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 22px;
+    background: #0b0e14;
+    color: #f4f6fa;
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    padding: 28px 26px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: center;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.30);
+  }
+  @media (min-width: 860px) {
+    .contact-card {
+      grid-template-columns: 1.05fr 0.95fr;
+      padding: 34px 36px;
+    }
+  }
+
+  .contact-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: right center;
+    opacity: 0.55;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .contact-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, rgba(9, 11, 16, 0.97) 0%, rgba(9, 11, 16, 0.90) 54%, rgba(9, 11, 16, 0.68) 100%);
+    pointer-events: none;
+  }
+
+  .contact-brand {
+    position: relative;
+    z-index: 2;
+  }
+
+  .footer-lockup {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+  }
+  .footer-lockup svg { width: 46px; height: 46px; flex-shrink: 0; }
+  .footer-lockup-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+  }
+  .footer-loc {
+    display: inline-block;
+    margin-top: 2px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    color: var(--cyan);
+    text-transform: uppercase;
+  }
+
+  .contact-blurb {
+    margin: 0;
+    max-width: 470px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #b8c2d4;
+  }
+
+  .contact-cards {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    gap: 12px;
+  }
+
+  .ccard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: rgba(17, 21, 30, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(10px);
+    transition: border-color .22s ease, transform .22s ease, background .22s ease;
+  }
+  .ccard:hover {
+    border-color: rgba(255, 176, 32, 0.55);
+    background: rgba(23, 28, 40, 0.92);
+    transform: translateY(-1px);
+  }
+  .ccard-ig:hover {
+    border-color: rgba(225, 48, 108, 0.55);
+  }
+
+  .ccard-main {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ccard-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    background: rgba(255, 176, 32, 0.14);
+    color: var(--accent);
+    border: 1px solid rgba(255, 176, 32, 0.25);
+  }
+  .ccard-ig .ccard-icon {
+    background: linear-gradient(135deg, rgba(253, 89, 73, 0.18), rgba(214, 36, 159, 0.18), rgba(40, 90, 235, 0.18));
+    color: #ff85b3;
+    border-color: rgba(255, 133, 179, 0.30);
+  }
+
+  .ccard-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .ccard-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8f9bb3;
+  }
+  .ccard-value {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .ccard-note {
+    font-size: 12px;
+    color: #9ba7be;
+  }
+
+  .copy-pill {
+    flex-shrink: 0;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f4f6fa;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, color .2s ease;
+  }
+  .copy-pill:hover { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .copy-pill.copied { background: var(--live); color: #052216; border-color: var(--live); }
+
+  .colophon {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 4px 0;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .back-top {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    transition: border-color .2s ease, color .2s ease;
+  }
+  .back-top:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------------- Lightbox ---------------- */
+  .lb {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 7, 11, 0.96);
+    backdrop-filter: blur(10px);
+    display: none;
+    z-index: 25;
+    flex-direction: column;
+    touch-action: none;
+    color: #f4f6fa;
+  }
   .lb.open { display: flex; }
-  .lb-top { display: flex; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top)) 12px 10px; color: #ddd; font-size: 13px; }
-  .lb-top .spacer { flex: 1; }
-  .ibtn { background: rgba(255,255,255,.1); border: 0; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; display: grid; place-items: center; }
-  .ibtn:hover { background: rgba(255,255,255,.2); }
-  .lb-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; }
-  .lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+
+  .lb-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+  }
+  .lb-brand-dot { width: 22px; height: 22px; flex-shrink: 0; }
+  .lb-folder {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 176, 32, 0.16);
+    color: var(--accent);
+    border: 1px solid rgba(255, 176, 32, 0.28);
+  }
+  .lb-folder[hidden] { display: none; }
+  .lb-time { color: #d6dce8; font-weight: 500; }
+  .lb-pos {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #94a0b8;
+  }
+
+  .ibtn {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background .2s ease, transform .15s ease;
+  }
+  .ibtn:hover { background: rgba(255, 255, 255, 0.22); }
+
+  .lb-stage {
+    flex: 1;
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    padding: 12px;
+  }
+  .lb-stage img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-drag: none;
+    border-radius: 6px;
+    transition: opacity .2s ease;
+  }
   .nav { position: absolute; top: 50%; transform: translateY(-50%); }
-  .nav.prev { left: 8px; } .nav.next { right: 8px; }
+  .nav.prev { left: 14px; }
+  .nav.next { right: 14px; }
   @media (max-width: 700px) { .nav { display: none; } }
-  .lb-bottom { display: flex; gap: 8px; justify-content: center; padding: 10px 12px calc(14px + env(safe-area-inset-bottom)); }
-  .abtn { background: var(--accent); color: var(--accent-ink); border: 0; padding: 10px 16px; border-radius: 999px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 14px; }
-  .abtn.ghost { background: rgba(255,255,255,.12); color: #fff; }
-  .spin { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,.25); border-top-color: #fff; border-radius: 50%; animation: rot .8s linear infinite; position: absolute; }
+
+  .lb-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+    padding: 12px 14px calc(14px + env(safe-area-inset-bottom));
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .abtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 0;
+    background: linear-gradient(120deg, #ffd166 0%, var(--accent) 55%, var(--accent-2) 100%);
+    color: var(--accent-ink);
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .abtn.ghost {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    font-weight: 600;
+  }
+  .abtn.ghost:hover { background: rgba(255, 255, 255, 0.20); }
+
+  .spin {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.22);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: rot .8s linear infinite;
+    position: absolute;
+  }
   @keyframes rot { to { transform: rotate(360deg); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .dot, .aperture-ring, .tile::before, .mini-refresh.spinning svg { animation: none !important; }
+    .tile, .tile img, .nav-pill, .btn-ig, .ccard, .brand-mark { transition: none !important; }
+  }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="bar">
-    <h1 id="title">Fishbowl Photography Game Highlights</h1>
-    <span class="live"><span class="dot" id="dot"></span><span id="status">connecting</span></span>
+<header class="topbar" id="topbar">
+  <div class="container topbar-inner">
+    <a href="#top" class="brand" aria-label="Fishbowl Photography Home">
+      <svg class="brand-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="navBg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#171f2e"/>
+            <stop offset="100%" stop-color="#090b10"/>
+          </linearGradient>
+          <linearGradient id="navRim" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.65"/>
+            <stop offset="55%" stop-color="#ffb020" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#ff7a18" stop-opacity="0.75"/>
+          </linearGradient>
+          <linearGradient id="navFish" x1="20" y1="24" x2="46" y2="44" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ffd166"/>
+            <stop offset="55%" stop-color="#ffb020"/>
+            <stop offset="100%" stop-color="#ff7a18"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#navBg)" stroke="url(#navRim)" stroke-width="2"/>
+        <path d="M22 15.2C24.8 14.1 28.2 13.5 32 13.5C35.8 13.5 39.2 14.1 42 15.2" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
+        <path d="M21.5 16.5C15.8 20.1 12 26.6 12 34C12 45.05 20.95 54 32 54C43.05 54 52 45.05 52 34C52 26.6 48.2 20.1 42.5 16.5" stroke="#e2e8f0" stroke-opacity="0.88" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M15.2 31.2C19.5 29.5 24.6 33.2 32 31.3C39.4 29.4 44.8 32.8 48.8 31.2" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-opacity="0.85"/>
+        <path d="M25.5 36.8C29.8 31.5 37.2 31.8 42.2 36.4C37.5 41.2 30.2 42.2 25.5 36.8Z" fill="url(#navFish)"/>
+        <path d="M26.5 36.8L19.8 32.2C20.9 35.1 20.9 38.5 19.8 41.4L26.5 36.8Z" fill="url(#navFish)"/>
+        <circle cx="37.4" cy="35.6" r="1.4" fill="#090b10"/>
+        <circle cx="20.6" cy="20.5" r="1.3" fill="#22d3ee"/>
+      </svg>
+      <span class="brand-text">
+        <span class="brand-main">FISHBOWL</span>
+        <span class="brand-sub">PHOTOGRAPHY</span>
+      </span>
+    </a>
+
     <span class="spacer"></span>
-    <span class="count" id="count"></span>
+
+    <div class="nav-actions">
+      <div class="live-pill" aria-live="polite">
+        <span class="dot" id="dot"></span>
+        <span id="status">connecting</span>
+        <button class="mini-refresh" id="refreshBtn" type="button" aria-label="Refresh gallery" title="Check for new photos">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+            <polyline points="21 3 21 9 15 9"/>
+          </svg>
+        </button>
+      </div>
+
+      <a class="nav-pill ig-pill" href="https://www.instagram.com/fishbowlphotography/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @fishbowlphotography">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="5"/>
+          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+        </svg>
+        <span class="pill-label">@fishbowlphotography</span>
+      </a>
+
+      <a class="nav-pill nav-contact" href="#contact" aria-label="Contact Fishbowl Photography">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="4" width="20" height="16" rx="3"/>
+          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+        </svg>
+        <span class="pill-label">Contact</span>
+      </a>
+
+      <button class="icon-btn" id="themeToggle" type="button" aria-label="Toggle color theme" title="Switch Light / Dark theme">
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+        </svg>
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+        </svg>
+      </button>
+    </div>
   </div>
-  <div class="tabs" id="tabs" role="tablist" hidden></div>
 </header>
 
-<main>
+<section class="container hero-wrap" id="top">
+  <div class="hero">
+    <img class="hero-bg" src="./assets/hero-bg.webp" alt="" aria-hidden="true">
+    <div class="hero-scrim" aria-hidden="true"></div>
+    <span class="vf-corner tl" aria-hidden="true"></span>
+    <span class="vf-corner tr" aria-hidden="true"></span>
+    <span class="vf-corner bl" aria-hidden="true"></span>
+    <span class="vf-corner br" aria-hidden="true"></span>
+
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="eyebrow-dot"></span>YYC // LIVE SIDELINE FEED</span>
+      <h1 id="title">Fishbowl Photography <span class="hl">Game Highlights</span></h1>
+      <p class="hero-sub">Fresh action frames streaming live from the camera. Tap any shot to view full-res, save, or share.</p>
+      <div class="hero-cta">
+        <a class="btn-ig" href="https://www.instagram.com/fishbowlphotography/" target="_blank" rel="noopener noreferrer">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="2" y="2" width="20" height="20" rx="5"/>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+          </svg>
+          Follow @fishbowlphotography
+        </a>
+
+        <div class="email-group">
+          <a class="email-link" href="mailto:david@l33.ca">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="4" width="20" height="16" rx="3"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            david@l33.ca
+          </a>
+          <button class="copy-icon-btn" id="copyEmailHero" type="button" aria-label="Copy david@l33.ca" title="Copy david@l33.ca">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="9" y="9" width="13" height="13" rx="2"/>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <svg class="reticle-svg" viewBox="0 0 260 216" fill="none">
+        <defs>
+          <linearGradient id="lensArc" x1="60" y1="36" x2="200" y2="180" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.85"/>
+            <stop offset="50%" stop-color="#ffb020" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#ff7a18" stop-opacity="0.5"/>
+          </linearGradient>
+          <linearGradient id="heroFish" x1="104" y1="90" x2="158" y2="132" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#ffd166"/>
+            <stop offset="55%" stop-color="#ffb020"/>
+            <stop offset="100%" stop-color="#ff7a18"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Outer barrel degree ticks -->
+        <circle cx="130" cy="108" r="82" stroke="rgba(255,255,255,0.14)" stroke-width="1" stroke-dasharray="2 7"/>
+        <circle cx="130" cy="108" r="71" stroke="rgba(34,211,238,0.22)" stroke-width="1"/>
+
+        <!-- Slowly rotating aperture arc ring -->
+        <g class="aperture-ring">
+          <circle cx="130" cy="108" r="62" stroke="url(#lensArc)" stroke-width="2.2" stroke-dasharray="56 26 24 26" stroke-linecap="round"/>
+          <circle cx="130" cy="108" r="50" stroke="rgba(255,176,32,0.32)" stroke-width="1.2" stroke-dasharray="14 18"/>
+        </g>
+
+        <!-- Optical crosshair ticks -->
+        <line x1="34" y1="108" x2="54" y2="108" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+        <line x1="206" y1="108" x2="226" y2="108" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+        <line x1="130" y1="12" x2="130" y2="28" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+        <line x1="130" y1="188" x2="130" y2="204" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+
+        <!-- Center Fishbowl emblem inside lens -->
+        <circle cx="130" cy="108" r="36" fill="rgba(9,11,16,0.78)" stroke="rgba(255,255,255,0.24)" stroke-width="1.4"/>
+        <path d="M116 82C120 80.3 124.8 79.4 130 79.4C135.2 79.4 140 80.3 144 82" stroke="#22d3ee" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M101 103.5C108 100.8 117 106.5 130 103.5C143 100.5 152 105.8 159 103.5" stroke="#22d3ee" stroke-width="1.3" stroke-opacity="0.78" stroke-linecap="round"/>
+        <path d="M121 112C127.8 104 139.2 104.5 147 111.5C139.8 118.8 128.4 120.2 121 112Z" fill="url(#heroFish)"/>
+        <path d="M122.4 112L112 105.2C113.6 109.6 113.6 114.4 112 118.8L122.4 112Z" fill="url(#heroFish)"/>
+        <circle cx="139.5" cy="110.2" r="2" fill="#090b10"/>
+        <circle cx="112" cy="89" r="1.8" fill="#22d3ee"/>
+
+        <!-- EXIF HUD tags -->
+        <g font-family="JetBrains Mono, monospace" font-size="9.5" font-weight="500" letter-spacing="0.08em">
+          <text x="16" y="26" fill="#22d3ee">AF-C</text>
+          <text x="216" y="26" fill="#ffb020">RAW</text>
+          <text x="16" y="198" fill="#94a0b8">YYC</text>
+          <text x="194" y="198" fill="#34d399">30S SYNC</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<div class="controls-bar">
+  <div class="container controls-inner">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Game folders" hidden></div>
+    <span class="feed-label" id="feedLabel">ALL HIGHLIGHTS</span>
+    <div class="controls-right">
+      <span class="count" id="count"></span>
+      <button class="density-btn" id="densityToggle" type="button" aria-pressed="false" title="Toggle grid tile size">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        <span id="densityLabel">Compact</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<main class="container gallery-main">
   <div id="grid" class="grid"></div>
   <div id="msg"></div>
 </main>
 
-<div class="toast" id="toast"></div>
+<footer class="container site-footer" id="contact">
+  <div class="contact-card">
+    <img class="contact-bg" src="./assets/og-card.jpg" alt="" aria-hidden="true">
+    <div class="contact-scrim" aria-hidden="true"></div>
 
-<div class="lb" id="lb" aria-modal="true" role="dialog">
-  <div class="lb-top">
-    <span id="lbName"></span>
-    <span class="spacer"></span>
-    <span id="lbPos"></span>
-    <button class="ibtn" id="lbClose" aria-label="Close">✕</button>
+    <div class="contact-brand">
+      <div class="footer-lockup">
+        <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="ftrBg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#171f2e"/>
+              <stop offset="100%" stop-color="#090b10"/>
+            </linearGradient>
+            <linearGradient id="ftrRim" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.7"/>
+              <stop offset="55%" stop-color="#ffb020" stop-opacity="0.65"/>
+              <stop offset="100%" stop-color="#ff7a18" stop-opacity="0.8"/>
+            </linearGradient>
+            <linearGradient id="ftrFish" x1="20" y1="24" x2="46" y2="44" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ffd166"/>
+              <stop offset="55%" stop-color="#ffb020"/>
+              <stop offset="100%" stop-color="#ff7a18"/>
+            </linearGradient>
+          </defs>
+          <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#ftrBg)" stroke="url(#ftrRim)" stroke-width="2"/>
+          <path d="M22 15.2C24.8 14.1 28.2 13.5 32 13.5C35.8 13.5 39.2 14.1 42 15.2" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
+          <path d="M21.5 16.5C15.8 20.1 12 26.6 12 34C12 45.05 20.95 54 32 54C43.05 54 52 45.05 52 34C52 26.6 48.2 20.1 42.5 16.5" stroke="#e2e8f0" stroke-opacity="0.88" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M15.2 31.2C19.5 29.5 24.6 33.2 32 31.3C39.4 29.4 44.8 32.8 48.8 31.2" stroke="#22d3ee" stroke-width="1.6" stroke-linecap="round" stroke-opacity="0.85"/>
+          <path d="M25.5 36.8C29.8 31.5 37.2 31.8 42.2 36.4C37.5 41.2 30.2 42.2 25.5 36.8Z" fill="url(#ftrFish)"/>
+          <path d="M26.5 36.8L19.8 32.2C20.9 35.1 20.9 38.5 19.8 41.4L26.5 36.8Z" fill="url(#ftrFish)"/>
+          <circle cx="37.4" cy="35.6" r="1.4" fill="#090b10"/>
+          <circle cx="20.6" cy="20.5" r="1.3" fill="#22d3ee"/>
+        </svg>
+        <div>
+          <div class="footer-lockup-title">Fishbowl Photography</div>
+          <span class="footer-loc">YYC · Calgary, Alberta</span>
+        </div>
+      </div>
+      <p class="contact-blurb">Game-day highlights, tournament coverage &amp; sports action photography in Calgary. Want high-res prints, full-game coverage, or team bookings? Reach out below.</p>
+    </div>
+
+    <div class="contact-cards">
+      <div class="ccard">
+        <a class="ccard-main" href="mailto:david@l33.ca">
+          <span class="ccard-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="3"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+          </span>
+          <span class="ccard-meta">
+            <span class="ccard-label">Direct Email</span>
+            <span class="ccard-value">david@l33.ca</span>
+            <span class="ccard-note">Bookings, prints &amp; full-res inquiries</span>
+          </span>
+        </a>
+        <button class="copy-pill" id="copyEmailFooter" type="button">Copy</button>
+      </div>
+
+      <a class="ccard ccard-ig" href="https://www.instagram.com/fishbowlphotography/" target="_blank" rel="noopener noreferrer">
+        <span class="ccard-main">
+          <span class="ccard-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5"/>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+            </svg>
+          </span>
+          <span class="ccard-meta">
+            <span class="ccard-label">Instagram</span>
+            <span class="ccard-value">@fishbowlphotography</span>
+            <span class="ccard-note">Follow for game edits &amp; highlights</span>
+          </span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a0b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17 17 7"/>
+          <path d="M7 7h10v10"/>
+        </svg>
+      </a>
+    </div>
   </div>
+
+  <div class="colophon">
+    <span>&copy; <span id="year"></span> Fishbowl Photography &middot; Calgary, AB (YYC)</span>
+    <a href="#top" class="back-top">Back to top &uarr;</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<div class="lb" id="lb" aria-modal="true" role="dialog" aria-label="Photo viewer">
+  <div class="lb-top">
+    <svg class="lb-brand-dot" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <rect x="2" y="2" width="60" height="60" rx="16" fill="#11151e" stroke="#ffb020" stroke-opacity="0.65" stroke-width="2.5"/>
+      <path d="M25.5 36.8C29.8 31.5 37.2 31.8 42.2 36.4C37.5 41.2 30.2 42.2 25.5 36.8Z" fill="#ffb020"/>
+      <path d="M26.5 36.8L19.8 32.2C20.9 35.1 20.9 38.5 19.8 41.4L26.5 36.8Z" fill="#ffb020"/>
+    </svg>
+    <span class="lb-folder" id="lbFolder" hidden></span>
+    <span class="lb-time" id="lbName"></span>
+    <span class="spacer"></span>
+    <span class="lb-pos" id="lbPos"></span>
+    <button class="ibtn" id="lbClose" type="button" aria-label="Close">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M18 6 6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
   <div class="lb-stage" id="stage">
     <div class="spin" id="lbSpin"></div>
     <img id="lbImg" alt="">
-    <button class="ibtn nav prev" id="lbPrev" aria-label="Previous">‹</button>
-    <button class="ibtn nav next" id="lbNext" aria-label="Next">›</button>
+    <button class="ibtn nav prev" id="lbPrev" type="button" aria-label="Previous">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m15 18-6-6 6-6"/>
+      </svg>
+    </button>
+    <button class="ibtn nav next" id="lbNext" type="button" aria-label="Next">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m9 18 6-6-6-6"/>
+      </svg>
+    </button>
   </div>
+
   <div class="lb-bottom">
-    <a class="abtn" id="lbDownload" download target="_blank" rel="noopener">Download</a>
-    <button class="abtn ghost" id="lbShare">Share</button>
+    <a class="abtn" id="lbDownload" download target="_blank" rel="noopener">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download
+    </a>
+    <button class="abtn ghost" id="lbShare" type="button">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="18" cy="5" r="3"/>
+        <circle cx="6" cy="12" r="3"/>
+        <circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+      Share
+    </button>
+    <a class="abtn ghost" href="https://www.instagram.com/fishbowlphotography/" target="_blank" rel="noopener noreferrer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5"/>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+      </svg>
+      Tag @fishbowlphotography
+    </a>
   </div>
 </div>
 
@@ -142,39 +1497,85 @@ const CONFIG = {
 };
 /* ====================================================== */
 
+const BRAND = {
+  name: "Fishbowl Photography",
+  email: "david@l33.ca",
+  instagram: "https://www.instagram.com/fishbowlphotography/",
+  handle: "@fishbowlphotography"
+};
+
 const params = new URLSearchParams(location.search);
 const DEMO = params.has("demo");
 if (params.get("folder")) CONFIG.folderId = params.get("folder");
 
 const $ = (s) => document.querySelector(s);
-const grid = $("#grid"), msg = $("#msg"), tabsEl = $("#tabs"), toast = $("#toast");
-document.title = CONFIG.title; $("#title").textContent = CONFIG.title;
+const grid = $("#grid"), msg = $("#msg"), tabsEl = $("#tabs"), feedLabel = $("#feedLabel"), toast = $("#toast");
+
+document.title = CONFIG.title;
+const titleEl = $("#title");
+if (CONFIG.title.startsWith(BRAND.name) && CONFIG.title.length > BRAND.name.length) {
+  const rest = CONFIG.title.slice(BRAND.name.length).trim();
+  titleEl.innerHTML = `${esc(BRAND.name)} <span class="hl">${esc(rest)}</span>`;
+} else {
+  titleEl.textContent = CONFIG.title;
+}
+$("#year").textContent = new Date().getFullYear();
 
 let photos = [];           // all photos, newest first
 let folders = new Map();   // id -> name (subfolders = games)
 let activeFolder = "all";
 let known = new Set();
 let firstLoad = true;
-let pendingNew = 0;
 let timer = null;
 
 const thumbUrl = (id, w) => `https://lh3.googleusercontent.com/d/${id}=w${w}`;
 const downloadUrl = (id) => `https://drive.google.com/uc?export=download&id=${id}`;
 
-function fmtTime(iso) {
-  const d = new Date(iso);
-  return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+function esc(str) {
+  return String(str).replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
 }
+
+function fmtTime(iso) {
+  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 function fmtDay(iso) {
   return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" });
 }
+
+function syncTopbarHeight() {
+  const tb = $("#topbar");
+  if (tb) document.documentElement.style.setProperty("--topbar-h", `${tb.offsetHeight}px`);
+}
+window.addEventListener("resize", syncTopbarHeight);
+syncTopbarHeight();
+
 function setStatus(text, ok = true) {
   $("#status").textContent = text;
   $("#dot").classList.toggle("off", !ok);
 }
+
 function showError(title, detail) {
-  msg.innerHTML = `<div class="error">${title}${detail ? `<code>${detail}</code>` : ""}</div>`;
   setStatus("offline", false);
+  if (photos.length > 0) {
+    showToast("Lost connection — retrying…");
+    return;
+  }
+  msg.innerHTML = `
+    <div class="state-card is-error">
+      <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+        <line x1="2" y1="2" x2="22" y2="22"/>
+      </svg>
+      <h2>${esc(title)}</h2>
+      <p>Check your connection or tap retry to reconnect to the sideline feed.</p>
+      ${detail ? `<code>${esc(detail)}</code>` : ""}
+      <button class="retry-btn" type="button" id="retryBtn">Retry now</button>
+    </div>`;
+  const rb = $("#retryBtn");
+  if (rb) rb.onclick = () => refresh();
 }
 
 async function driveList(q, fields, pageToken) {
@@ -233,44 +1634,97 @@ function demoPhotos() {
   const now = Date.now();
   const out = [];
   for (let i = 0; i < 24; i++) {
-    out.push({ id: `demo${i}`, name: `DSC0${1000 + i}.JPG`, time: new Date(now - i * 97000).toISOString(),
-      folder: i % 3 === 0 ? "g2" : "g1", demo: `https://picsum.photos/seed/hl${i}/900/600` });
+    out.push({
+      id: `demo${i}`,
+      name: `DSC0${1000 + i}.JPG`,
+      time: new Date(now - i * 97000).toISOString(),
+      folder: i % 3 === 0 ? "g2" : "g1",
+      demo: `https://picsum.photos/seed/hl${i}/900/600`
+    });
   }
   folders = new Map([["g1", "vs Lincoln"], ["g2", "vs Central"]]);
   return out;
 }
 
+function folderLabel(id) {
+  if (id === "all") return "All";
+  const raw = folders.get(id);
+  if (!raw) return "";
+  return (CONFIG.tabNames || {})[raw.toLowerCase()] || CONFIG.tabNames?.[raw] || raw;
+}
+
 function renderTabs() {
-  if (folders.size === 0) { tabsEl.hidden = true; return; }
+  if (folders.size === 0) {
+    tabsEl.hidden = true;
+    feedLabel.hidden = false;
+    return;
+  }
   tabsEl.hidden = false;
-  const label = (n) => (CONFIG.tabNames || {})[n.toLowerCase()] || CONFIG.tabNames?.[n] || n;
-  const subs = [...folders].map(([id, n]) => [id, label(n)]);
+  feedLabel.hidden = true;
+  if (activeFolder !== "all" && !folders.has(activeFolder)) activeFolder = "all";
+
+  const counts = new Map();
+  photos.forEach(p => counts.set(p.folder, (counts.get(p.folder) || 0) + 1));
+
+  const subs = [...folders].map(([id]) => [id, folderLabel(id), counts.get(id) || 0]);
   // Put the live/incoming tab right after "All", the rest alphabetical
   subs.sort((a, b) => (a[1] === "Latest" ? -1 : b[1] === "Latest" ? 1 : a[1].localeCompare(b[1])));
-  const items = [["all", "All"], ...subs];
-  tabsEl.innerHTML = items.map(([id, name]) =>
-    `<button class="tab" role="tab" data-id="${id}" aria-selected="${id === activeFolder}">${name}</button>`).join("");
+  const items = [["all", "All", photos.length], ...subs];
+
+  tabsEl.innerHTML = items.map(([id, name, n]) =>
+    `<button class="tab" role="tab" data-id="${esc(id)}" aria-selected="${id === activeFolder}">
+      <span>${esc(name)}</span><span class="tab-n">${n}</span>
+    </button>`).join("");
 }
+
 tabsEl.addEventListener("click", (e) => {
-  const b = e.target.closest(".tab"); if (!b) return;
-  activeFolder = b.dataset.id; renderTabs(); renderGrid();
+  const b = e.target.closest(".tab");
+  if (!b) return;
+  activeFolder = b.dataset.id;
+  renderTabs();
+  renderGrid();
 });
 
 function visible() {
   return activeFolder === "all" ? photos : photos.filter(p => p.folder === activeFolder);
 }
 
+function updateCount(n) {
+  $("#count").textContent = n ? `${n} frame${n === 1 ? "" : "s"}` : "";
+}
+
 function tileFor(p) {
   const b = document.createElement("button");
-  b.className = "tile"; b.dataset.id = p.id;
-  const isNew = (Date.now() - new Date(p.time)) < CONFIG.newBadgeMinutes * 60000;
-  if (isNew) b.classList.add("new");
+  b.className = "tile";
+  b.type = "button";
+  b.dataset.id = p.id;
+  b.setAttribute("aria-label", `View ${p.name} captured at ${fmtTime(p.time)}`);
+
   const img = document.createElement("img");
-  img.loading = "lazy"; img.alt = p.name;
+  img.loading = "lazy";
+  img.alt = p.name;
   img.src = p.demo || thumbUrl(p.id, CONFIG.thumbWidth);
-  img.onload = () => img.classList.add("loaded");
-  const t = document.createElement("span"); t.className = "time"; t.textContent = fmtTime(p.time);
-  b.append(img, t);
+  const done = () => { img.classList.add("loaded"); b.classList.add("is-loaded"); };
+  img.onload = done;
+  img.onerror = done;
+
+  const scrim = document.createElement("span");
+  scrim.className = "tile-scrim";
+  scrim.setAttribute("aria-hidden", "true");
+
+  const t = document.createElement("span");
+  t.className = "time";
+  t.textContent = fmtTime(p.time);
+
+  b.append(img, scrim);
+  if ((Date.now() - new Date(p.time)) < CONFIG.newBadgeMinutes * 60000) {
+    const badge = document.createElement("span");
+    badge.className = "tile-badge";
+    badge.textContent = "NEW";
+    b.appendChild(badge);
+  }
+  b.appendChild(t);
+
   b.addEventListener("click", () => openLightbox(p.id));
   return b;
 }
@@ -280,12 +1734,22 @@ function renderGrid() {
   grid.innerHTML = "";
   msg.innerHTML = "";
   if (list.length === 0) {
-    msg.innerHTML = `<div class="empty">No photos yet. They'll appear here as soon as they're sent from the camera.</div>`;
+    msg.innerHTML = `
+      <div class="state-card">
+        <svg width="48" height="48" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+          <circle cx="32" cy="34" r="20" stroke="#94a0b8" stroke-opacity="0.5" stroke-width="2.5"/>
+          <path d="M22 15.2C24.8 14.1 28.2 13.5 32 13.5C35.8 13.5 39.2 14.1 42 15.2" stroke="#22d3ee" stroke-width="2.2" stroke-linecap="round"/>
+          <path d="M25.5 36.8C29.8 31.5 37.2 31.8 42.2 36.4C37.5 41.2 30.2 42.2 25.5 36.8Z" fill="#ffb020"/>
+          <path d="M26.5 36.8L19.8 32.2C20.9 35.1 20.9 38.5 19.8 41.4L26.5 36.8Z" fill="#ffb020"/>
+        </svg>
+        <h2>No photos yet</h2>
+        <p>Action shots will appear here automatically as soon as they're sent from the sideline camera.</p>
+      </div>`;
   }
   const frag = document.createDocumentFragment();
   list.forEach(p => frag.appendChild(tileFor(p)));
   grid.appendChild(frag);
-  $("#count").textContent = list.length ? `${list.length} photo${list.length === 1 ? "" : "s"}` : "";
+  updateCount(list.length);
 }
 
 function prependNew(newOnes) {
@@ -294,113 +1758,237 @@ function prependNew(newOnes) {
   if (list.length === 0) return;
   msg.innerHTML = "";
   list.slice().reverse().forEach(p => grid.prepend(tileFor(p)));
-  const total = visible().length;
-  $("#count").textContent = `${total} photo${total === 1 ? "" : "s"}`;
+  updateCount(visible().length);
 }
 
-function showToast(n) {
-  toast.textContent = `${n} new photo${n === 1 ? "" : "s"}`;
+function showToast(text, { scrollToTop = false } = {}) {
+  toast.textContent = text;
+  toast.dataset.scroll = scrollToTop ? "1" : "";
   toast.classList.add("show");
   clearTimeout(toast._t);
   toast._t = setTimeout(() => toast.classList.remove("show"), 4000);
 }
-toast.addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); toast.classList.remove("show"); });
+toast.addEventListener("click", () => {
+  if (toast.dataset.scroll === "1") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  toast.classList.remove("show");
+});
 
 async function refresh() {
+  const rb = $("#refreshBtn");
+  if (rb) rb.classList.add("spinning");
   try {
-    setStatus(firstLoad ? "loading" : "live");
+    setStatus(firstLoad ? "loading" : "syncing");
     const fresh = await fetchPhotos();
     fresh.sort((a, b) => new Date(b.time) - new Date(a.time));
     const newOnes = fresh.filter(p => !known.has(p.id));
     const prevFolderCount = folders.size;
 
     if (firstLoad) {
-      photos = fresh; fresh.forEach(p => known.add(p.id));
-      renderTabs(); renderGrid(); firstLoad = false;
+      photos = fresh;
+      fresh.forEach(p => known.add(p.id));
+      renderTabs();
+      renderGrid();
+      firstLoad = false;
     } else if (newOnes.length) {
       newOnes.forEach(p => known.add(p.id));
       photos = fresh;
-      if (folders.size !== prevFolderCount) renderTabs();
+      renderTabs();
       if (window.scrollY < 200) {
         prependNew(newOnes);
       } else {
         // user is reading further down: don't shove the grid, just tell them
         prependNew(newOnes);
-        showToast(newOnes.length);
+        showToast(`${newOnes.length} new photo${newOnes.length === 1 ? "" : "s"} — tap to view`, { scrollToTop: true });
       }
-    } else if (fresh.length !== photos.length) {
-      photos = fresh; renderGrid(); // something was deleted
+    } else if (fresh.length !== photos.length || folders.size !== prevFolderCount) {
+      photos = fresh;
+      renderTabs();
+      renderGrid(); // something was deleted or folder changed
     }
     setStatus(`live · ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`);
   } catch (e) {
     showError(firstLoad ? "Could not load the gallery." : "Lost connection. Retrying…", e.message);
+  } finally {
+    if (rb) rb.classList.remove("spinning");
   }
 }
 
 function schedule() {
   clearInterval(timer);
-  timer = setInterval(() => { if (document.visibilityState === "visible") refresh(); }, CONFIG.pollSeconds * 1000);
+  timer = setInterval(() => {
+    if (document.visibilityState === "visible") refresh();
+  }, CONFIG.pollSeconds * 1000);
 }
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") refresh();
+});
+$("#refreshBtn").addEventListener("click", () => refresh());
+
+/* ---------------- Theme, Density & Copy Controls ---------------- */
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  const meta = $("#themeColorMeta");
+  if (meta) meta.content = theme === "light" ? "#f4f6fa" : "#090b10";
+  try { localStorage.setItem("fp_theme", theme); } catch {}
+}
+
+$("#themeToggle").addEventListener("click", () => {
+  const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+  applyTheme(next);
+});
+
+const densityBtn = $("#densityToggle");
+const densityLabel = $("#densityLabel");
+function applyDensity(isLarge) {
+  grid.classList.toggle("large", isLarge);
+  densityBtn.setAttribute("aria-pressed", String(isLarge));
+  densityLabel.textContent = isLarge ? "Large" : "Compact";
+  try { localStorage.setItem("fp_density", isLarge ? "large" : "compact"); } catch {}
+}
+try {
+  if (localStorage.getItem("fp_density") === "large") applyDensity(true);
+} catch {}
+densityBtn.addEventListener("click", () => applyDensity(!grid.classList.contains("large")));
+
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand("copy");
+  ta.remove();
+}
+
+async function handleCopyEmail(btn) {
+  try {
+    await copyText(BRAND.email);
+    btn.classList.add("copied");
+    if (btn.id === "copyEmailFooter") btn.textContent = "Copied!";
+    showToast(`Copied ${BRAND.email}`);
+    clearTimeout(btn._t);
+    btn._t = setTimeout(() => {
+      btn.classList.remove("copied");
+      if (btn.id === "copyEmailFooter") btn.textContent = "Copy";
+    }, 1800);
+  } catch {
+    showToast(BRAND.email);
+  }
+}
+$("#copyEmailHero").addEventListener("click", (e) => handleCopyEmail(e.currentTarget));
+$("#copyEmailFooter").addEventListener("click", (e) => handleCopyEmail(e.currentTarget));
 
 /* ---------------- Lightbox ---------------- */
-const lb = $("#lb"), lbImg = $("#lbImg"), lbSpin = $("#lbSpin");
+const lb = $("#lb"), lbImg = $("#lbImg"), lbSpin = $("#lbSpin"), lbFolder = $("#lbFolder");
 let lbIndex = -1;
 
 function openLightbox(id) {
   const list = visible();
   lbIndex = list.findIndex(p => p.id === id);
   if (lbIndex < 0) return;
-  lb.classList.add("open"); document.body.style.overflow = "hidden";
+  lb.classList.add("open");
+  document.body.style.overflow = "hidden";
   showLb();
   history.pushState({ lb: true }, "");
 }
+
 function closeLightbox(fromPop) {
-  lb.classList.remove("open"); document.body.style.overflow = "";
+  lb.classList.remove("open");
+  document.body.style.overflow = "";
   lbImg.removeAttribute("src");
   if (!fromPop && history.state?.lb) history.back();
 }
+
 function showLb() {
-  const list = visible(); const p = list[lbIndex]; if (!p) return;
-  lbSpin.style.display = "block"; lbImg.style.opacity = ".25";
+  const list = visible();
+  const p = list[lbIndex];
+  if (!p) return;
+  lbSpin.style.display = "block";
+  lbImg.style.opacity = ".25";
   lbImg.src = p.demo ? p.demo.replace("/900/600", "/1800/1200") : thumbUrl(p.id, CONFIG.fullWidth);
-  lbImg.onload = () => { lbSpin.style.display = "none"; lbImg.style.opacity = "1"; };
+  const done = () => { lbSpin.style.display = "none"; lbImg.style.opacity = "1"; };
+  lbImg.onload = done;
+  lbImg.onerror = done;
+
+  const fName = folderLabel(p.folder);
+  if (fName && folders.size > 0) {
+    lbFolder.textContent = fName;
+    lbFolder.hidden = false;
+  } else {
+    lbFolder.hidden = true;
+  }
+
   $("#lbName").textContent = `${fmtDay(p.time)} · ${fmtTime(p.time)}`;
-  $("#lbPos").textContent = `${lbIndex + 1} / ${list.length}`;
+  const pad = (n) => String(n).padStart(2, "0");
+  $("#lbPos").textContent = `${pad(lbIndex + 1)} / ${pad(list.length)}`;
   $("#lbDownload").href = p.demo || downloadUrl(p.id);
   $("#lbDownload").setAttribute("download", p.name);
+
   // Preload neighbours
-  [lbIndex - 1, lbIndex + 1].forEach(i => { const n = list[i]; if (n && !n.demo) { const im = new Image(); im.src = thumbUrl(n.id, CONFIG.fullWidth); } });
+  [lbIndex - 1, lbIndex + 1].forEach(i => {
+    const n = list[i];
+    if (n && !n.demo) {
+      const im = new Image();
+      im.src = thumbUrl(n.id, CONFIG.fullWidth);
+    }
+  });
 }
+
 function step(d) {
   const list = visible();
-  lbIndex = (lbIndex + d + list.length) % list.length; showLb();
+  if (!list.length) return;
+  lbIndex = (lbIndex + d + list.length) % list.length;
+  showLb();
 }
+
 $("#lbClose").onclick = () => closeLightbox();
 $("#lbPrev").onclick = () => step(-1);
 $("#lbNext").onclick = () => step(1);
 $("#lbShare").onclick = async () => {
-  const p = visible()[lbIndex]; if (!p) return;
+  const p = visible()[lbIndex];
+  if (!p) return;
   const url = p.demo || `https://drive.google.com/file/d/${p.id}/view`;
-  if (navigator.share) { try { await navigator.share({ title: CONFIG.title, url }); } catch {} }
-  else { await navigator.clipboard.writeText(url); showToast(0); toast.textContent = "Link copied"; }
+  if (navigator.share) {
+    try { await navigator.share({ title: CONFIG.title, url }); } catch {}
+  } else {
+    await copyText(url);
+    showToast("Link copied");
+  }
 };
-window.addEventListener("popstate", () => { if (lb.classList.contains("open")) closeLightbox(true); });
+
+window.addEventListener("popstate", () => {
+  if (lb.classList.contains("open")) closeLightbox(true);
+});
+
 document.addEventListener("keydown", (e) => {
   if (!lb.classList.contains("open")) return;
   if (e.key === "Escape") closeLightbox();
   if (e.key === "ArrowLeft") step(-1);
   if (e.key === "ArrowRight") step(1);
 });
+
 // Swipe
 let sx = 0, sy = 0;
-$("#stage").addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+$("#stage").addEventListener("touchstart", (e) => {
+  sx = e.touches[0].clientX;
+  sy = e.touches[0].clientY;
+}, { passive: true });
 $("#stage").addEventListener("touchend", (e) => {
-  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  const dx = e.changedTouches[0].clientX - sx;
+  const dy = e.changedTouches[0].clientY - sy;
   if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
   else if (dy > 90 && Math.abs(dx) < 60) closeLightbox();
 });
-$("#stage").addEventListener("click", (e) => { if (e.target === $("#stage")) closeLightbox(); });
+$("#stage").addEventListener("click", (e) => {
+  if (e.target === $("#stage")) closeLightbox();
+});
 
 refresh().then(schedule);
 </script>
