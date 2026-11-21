@@ -1082,11 +1082,12 @@
   .lb-stage.zoomed { cursor: grab; }
   .lb-stage.zoomed.dragging { cursor: grabbing; }
   .lb-stage img {
-    width: 100%;
-    height: 100%;           /* fill the stage; contain letterboxes inside it */
+    max-width: 100%;
+    max-height: 100%;       /* fit inside the stage (its cell is a definite 1fr track) */
+    width: auto;
+    height: auto;
     min-height: 0;
     transform-origin: 0 0;
-    will-change: transform;
     touch-action: none;
     pointer-events: none;   /* the stage handles all pointer input */
     object-fit: contain;
@@ -2169,38 +2170,42 @@ function zoomApply() {
 }
 function zoomReset() { Z.scale = 1; Z.tx = 0; Z.ty = 0; zoomApply(); }
 
-// Keep the picture covering the stage: no dragging it off into the void
-function zoomClamp() {
-  const r = stage.getBoundingClientRect();
-  const w = r.width * Z.scale, h = r.height * Z.scale;
-  const minX = Math.min(0, r.width - w), minY = Math.min(0, r.height - h);
-  Z.tx = Math.max(minX, Math.min(0, Z.tx));
-  Z.ty = Math.max(minY, Math.min(0, Z.ty));
+// The picture's layout box inside the stage (before any transform)
+function box() { return { ox: lbImg.offsetLeft, oy: lbImg.offsetTop, w: lbImg.offsetWidth || 1, h: lbImg.offsetHeight || 1 }; }
+// Max zoom: about 1.5x the file's real pixels, never less than 2x, never more than 6x
+function maxScale() {
+  const b = box();
+  const onePx = lbImg.naturalWidth ? lbImg.naturalWidth / b.w : 2;
+  return Math.min(6, Math.max(2, onePx * 1.5));
 }
 
-// Zoom so the point under (cx, cy) in stage coordinates stays put
+// Keep the picture covering the stage where it's bigger, centred where it's smaller
+function zoomClamp() {
+  const r = stage.getBoundingClientRect();
+  const b = box();
+  const w = b.w * Z.scale, h = b.h * Z.scale;
+  const L = w > r.width ? Math.max(r.width - w, Math.min(0, b.ox + Z.tx)) : (r.width - w) / 2;
+  const T = h > r.height ? Math.max(r.height - h, Math.min(0, b.oy + Z.ty)) : (r.height - h) / 2;
+  Z.tx = L - b.ox;
+  Z.ty = T - b.oy;
+}
+
+// Zoom so the picture point under (cx, cy) in stage coordinates stays put
 function zoomTo(scale, cx, cy) {
-  scale = Math.max(Z.min, Math.min(Z.max, scale));
-  const k = scale / Z.scale;
-  Z.tx = cx - (cx - Z.tx) * k;
-  Z.ty = cy - (cy - Z.ty) * k;
+  scale = Math.max(Z.min, Math.min(maxScale(), scale));
+  const b = box();
+  const u = (cx - b.ox - Z.tx) / Z.scale, v = (cy - b.oy - Z.ty) / Z.scale;
   Z.scale = scale;
+  Z.tx = cx - b.ox - u * scale;
+  Z.ty = cy - b.oy - v * scale;
   if (Z.scale <= 1.001) { Z.scale = 1; Z.tx = 0; Z.ty = 0; } else zoomClamp();
   zoomApply();
 }
-// Is a stage-space point over the rendered picture (not the letterbox / backdrop)?
+// Is a stage-space point over the picture (not the backdrop)?
 function pointInImage(x, y) {
-  const r = stage.getBoundingClientRect();
-  const nw = lbImg.naturalWidth, nh = lbImg.naturalHeight;
-  if (!nw || !nh) return true;
-  const pad = 12; // matches .lb-stage padding
-  const bw = r.width - pad * 2, bh = r.height - pad * 2;
-  const k = Math.min(bw / nw, bh / nh);
-  const w = nw * k * Z.scale, h = nh * k * Z.scale;
-  const ox = pad + (bw - nw * k) / 2, oy = pad + (bh - nh * k) / 2;
-  // image box in stage space after translate/scale (transform-origin 0 0 on the full-stage img element)
-  const left = Z.tx + ox * Z.scale, top = Z.ty + oy * Z.scale;
-  return x >= left && x <= left + w && y >= top && y <= top + h;
+  const b = box();
+  const L = b.ox + Z.tx, T = b.oy + Z.ty;
+  return x >= L && x <= L + b.w * Z.scale && y >= T && y <= T + b.h * Z.scale;
 }
 function stagePoint(e) {
   const r = stage.getBoundingClientRect();
