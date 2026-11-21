@@ -621,21 +621,29 @@
     padding-bottom: 36px;
   }
 
+  /* Justified rows: every tile keeps its own aspect ratio (--r = width/height),
+     rows fill the width, and nothing gets cropped. */
   .grid {
-    display: grid;
+    --row: 150px;
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--gap);
-    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
   }
-  .grid.large { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .grid.large { --row: 230px; }
   @media (min-width: 700px) {
     :root { --gap: 12px; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
-    .grid.large { grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); }
+    .grid { --row: 230px; }
+    .grid.large { --row: 320px; }
   }
+  .grid::after { content: ""; flex-grow: 1000; min-width: 0; }
 
   .tile {
     position: relative;
-    aspect-ratio: 3 / 2;
+    --r: 1.5;
+    aspect-ratio: var(--r);
+    width: calc(var(--r) * var(--row));
+    flex-grow: calc(var(--r) * 100);
+    max-width: 100%;
     background: var(--surface-2);
     border-radius: var(--radius);
     overflow: hidden;
@@ -659,8 +667,7 @@
   .tile img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center 25%;
+    object-fit: contain;
     display: block;
     opacity: 0;
     transition: opacity .35s ease, transform .4s cubic-bezier(0.22, 1, 0.36, 1);
@@ -1639,7 +1646,8 @@ function demoPhotos() {
       name: `DSC0${1000 + i}.JPG`,
       time: new Date(now - i * 97000).toISOString(),
       folder: i % 3 === 0 ? "g2" : "g1",
-      demo: `https://picsum.photos/seed/hl${i}/900/600`
+      w: [900, 600, 900, 1200, 900][i % 5], h: [600, 900, 900, 600, 500][i % 5],
+      demo: `https://picsum.photos/seed/hl${i}/${[900, 600, 900, 1200, 900][i % 5]}/${[600, 900, 900, 600, 500][i % 5]}`
     });
   }
   folders = new Map([["g1", "vs Lincoln"], ["g2", "vs Central"]]);
@@ -1699,6 +1707,19 @@ function tileFor(p) {
   b.type = "button";
   b.dataset.id = p.id;
   b.setAttribute("aria-label", `View ${p.name} captured at ${fmtTime(p.time)}`);
+  const ratio = (p.w && p.h) ? Math.min(Math.max(p.w / p.h, 0.5), 2.6) : 1.5;
+  b.style.setProperty("--r", ratio.toFixed(4));
+  // Drive sometimes hasn't read the dimensions yet; learn them from the thumbnail
+  if (!(p.w && p.h)) {
+    const probe = new Image();
+    probe.onload = () => {
+      if (probe.naturalWidth && probe.naturalHeight) {
+        p.w = probe.naturalWidth; p.h = probe.naturalHeight;
+        b.style.setProperty("--r", Math.min(Math.max(p.w / p.h, 0.5), 2.6).toFixed(4));
+      }
+    };
+    probe.src = p.demo || thumbUrl(p.id, CONFIG.thumbWidth);
+  }
 
   const img = document.createElement("img");
   img.loading = "lazy";
@@ -1912,7 +1933,7 @@ function showLb() {
   if (!p) return;
   lbSpin.style.display = "block";
   lbImg.style.opacity = ".25";
-  lbImg.src = p.demo ? p.demo.replace("/900/600", "/1800/1200") : thumbUrl(p.id, CONFIG.fullWidth);
+  lbImg.src = p.demo ? p.demo.replace(/\/(\d+)\/(\d+)$/, (m, w, h) => `/${w * 2}/${h * 2}`) : thumbUrl(p.id, CONFIG.fullWidth);
   const done = () => { lbSpin.style.display = "none"; lbImg.style.opacity = "1"; };
   lbImg.onload = done;
   lbImg.onerror = done;
