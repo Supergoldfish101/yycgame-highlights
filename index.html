@@ -1222,6 +1222,72 @@
     background: rgba(15, 19, 26, 0.05);
     border-color: rgba(15, 19, 26, 0.16);
   }
+
+  /* ----- Light mode, second pass: keep the dark art alive as an inset on the right ----- */
+  [data-theme="light"] .hero,
+  [data-theme="light"] .contact-card {
+    background:
+      radial-gradient(520px 260px at 88% 30%, rgba(255, 176, 32, 0.22), transparent 62%),
+      radial-gradient(420px 240px at 74% 92%, rgba(34, 211, 238, 0.18), transparent 60%),
+      radial-gradient(260px 180px at 10% 100%, rgba(255, 122, 24, 0.10), transparent 60%),
+      linear-gradient(135deg, #ffffff 0%, #fffaf0 60%, #f3fcfe 100%);
+  }
+  [data-theme="light"] .hero-bg,
+  [data-theme="light"] .contact-bg {
+    opacity: 1;
+    filter: none;
+    mix-blend-mode: normal;
+  }
+  /* Phone / narrow: art stays faint behind the text, glows carry the colour */
+  [data-theme="light"] .hero-bg { opacity: 0.22; mix-blend-mode: multiply; }
+  [data-theme="light"] .contact-bg { opacity: 0.18; mix-blend-mode: multiply; }
+  [data-theme="light"] .hero-scrim {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.80) 60%, rgba(255, 255, 255, 0.55) 100%);
+  }
+  [data-theme="light"] .contact-scrim {
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(255, 255, 255, 0.84) 60%, rgba(255, 255, 255, 0.62) 100%);
+  }
+
+  /* Wide: full-strength art revealed on the right, white sweeping in from the left */
+  @media (min-width: 860px) {
+    [data-theme="light"] .hero-bg { opacity: 1; mix-blend-mode: normal; object-position: right center; }
+    [data-theme="light"] .hero-scrim {
+      background:
+        linear-gradient(90deg,
+          #ffffff 0%, #ffffff 44%,
+          rgba(255, 255, 255, 0.97) 52%,
+          rgba(255, 255, 255, 0.72) 60%,
+          rgba(255, 255, 255, 0.18) 70%,
+          rgba(255, 255, 255, 0.00) 80%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.00) 100%);
+    }
+    [data-theme="light"] .hero-visual .reticle-svg { filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.45)); }
+    [data-theme="light"] .vf-corner.tr { border-color: rgba(34, 211, 238, 0.95); }
+    [data-theme="light"] .vf-corner.br { border-color: var(--accent); }
+    [data-theme="light"] .vf-corner.bl { border-color: rgba(15, 19, 26, 0.22); }
+
+    [data-theme="light"] .contact-bg { opacity: 0.92; mix-blend-mode: normal; object-position: 78% center; }
+    [data-theme="light"] .contact-scrim {
+      background:
+        linear-gradient(90deg,
+          #ffffff 0%, #ffffff 40%,
+          rgba(255, 255, 255, 0.96) 48%,
+          rgba(255, 255, 255, 0.70) 56%,
+          rgba(255, 255, 255, 0.22) 66%,
+          rgba(255, 255, 255, 0.06) 78%,
+          rgba(255, 255, 255, 0.00) 100%);
+    }
+    /* contact cards sit on the dark lens art: go glassy-light with a crisp edge */
+    [data-theme="light"] .ccard {
+      background: rgba(255, 255, 255, 0.90);
+      border-color: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+      backdrop-filter: blur(14px);
+    }
+    [data-theme="light"] .ccard:hover { background: #ffffff; border-color: rgba(227, 154, 0, 0.6); }
+  }
 </style>
 </head>
 <body>
