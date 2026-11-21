@@ -2188,6 +2188,20 @@ function zoomTo(scale, cx, cy) {
   if (Z.scale <= 1.001) { Z.scale = 1; Z.tx = 0; Z.ty = 0; } else zoomClamp();
   zoomApply();
 }
+// Is a stage-space point over the rendered picture (not the letterbox / backdrop)?
+function pointInImage(x, y) {
+  const r = stage.getBoundingClientRect();
+  const nw = lbImg.naturalWidth, nh = lbImg.naturalHeight;
+  if (!nw || !nh) return true;
+  const pad = 12; // matches .lb-stage padding
+  const bw = r.width - pad * 2, bh = r.height - pad * 2;
+  const k = Math.min(bw / nw, bh / nh);
+  const w = nw * k * Z.scale, h = nh * k * Z.scale;
+  const ox = pad + (bw - nw * k) / 2, oy = pad + (bh - nh * k) / 2;
+  // image box in stage space after translate/scale (transform-origin 0 0 on the full-stage img element)
+  const left = Z.tx + ox * Z.scale, top = Z.ty + oy * Z.scale;
+  return x >= left && x <= left + w && y >= top && y <= top + h;
+}
 function stagePoint(e) {
   const r = stage.getBoundingClientRect();
   return [e.clientX - r.left, e.clientY - r.top];
@@ -2256,11 +2270,19 @@ function pointerEnd(e) {
     if (dy > 90 && Math.abs(dx) < 60) { closeLightbox(); return; }
   }
   if (!moved && Math.hypot(dx, dy) < 6) {
-    // Tap / click: double = zoom toggle, single on the backdrop = close
+    const [px, py] = stagePoint(e);
+    const onPhoto = pointInImage(px, py);
+    if (e.pointerType === "mouse") {
+      // Mouse: one click on the photo toggles zoom, a click on the backdrop closes
+      if (onPhoto) zoomToggle(px, py);
+      else if (Z.scale <= 1.01) closeLightbox();
+      return;
+    }
+    // Touch: double-tap toggles zoom, single tap on the backdrop closes
     const now = Date.now();
-    if (now - lastTap < 320) { lastTap = 0; zoomToggle(...stagePoint(e)); return; }
+    if (now - lastTap < 320) { lastTap = 0; zoomToggle(px, py); return; }
     lastTap = now;
-    if (e.target === stage && Z.scale <= 1.01) {
+    if (!onPhoto && Z.scale <= 1.01) {
       setTimeout(() => { if (lastTap === now) closeLightbox(); }, 330);
     }
   }
