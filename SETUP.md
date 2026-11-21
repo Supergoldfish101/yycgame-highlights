@@ -1,5 +1,10 @@
 # Live gallery setup
 
+**Live:** https://yycgame.l33.ca (Cloudflare Pages project `yycgame-highlights`, auto-deploys from the `main` branch of github.com/Supergoldfish101/yycgame-highlights). Drive folder `GameHighlights` is shared view-only by link; API key "Gallery web key" in Google Cloud project YYCGameHighlights is restricted to the Drive API and the referrers yycgame.l33.ca, *.pages.dev and localhost:8765.
+
+To change anything: edit `index.html`, commit, push. Cloudflare rebuilds in about a minute.
+
+
 One static page (`index.html`) that reads a public Google Drive folder and shows a live grid. Nothing runs on a server; the parents' browsers call the Drive API directly.
 
 ## 1. Share the Drive folder
