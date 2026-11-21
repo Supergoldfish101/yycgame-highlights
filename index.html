@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Game Highlights</title>
+<meta name="description" content="Live photo gallery fed from a Google Drive folder.">
+<meta name="theme-color" content="#0f1115">
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #171a21;
+    --panel-2: #1f232c;
+    --text: #e8eaef;
+    --muted: #9aa3b2;
+    --accent: #ffb020;
+    --accent-ink: #1a1200;
+    --border: #2a2f3a;
+    --radius: 12px;
+    --gap: 8px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f5f6f8; --panel: #ffffff; --panel-2: #eef0f4; --text: #15181e;
+      --muted: #5c6573; --border: #d9dde5;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: inherit; }
+
+  header {
+    position: sticky; top: 0; z-index: 5;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+  }
+  .bar { display: flex; align-items: center; gap: 12px; max-width: 1400px; margin: 0 auto; }
+  h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: .2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .live { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #3ecf8e; box-shadow: 0 0 0 0 rgba(62,207,142,.6); animation: pulse 2s infinite; }
+  .dot.off { background: #c0392b; animation: none; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(62,207,142,.6);} 70% { box-shadow: 0 0 0 8px rgba(62,207,142,0);} 100% { box-shadow: 0 0 0 0 rgba(62,207,142,0);} }
+  .spacer { flex: 1; }
+  .count { font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+  .tabs { display: flex; gap: 6px; overflow-x: auto; max-width: 1400px; margin: 10px auto 0; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 0 0 auto; border: 1px solid var(--border); background: var(--panel); color: var(--text);
+    padding: 6px 12px; border-radius: 999px; font-size: 13px; cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+
+  main { max-width: 1400px; margin: 0 auto; padding: 12px 16px calc(24px + env(safe-area-inset-bottom)); }
+  .grid { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  @media (min-width: 700px) { .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
+  .tile { position: relative; aspect-ratio: 3 / 2; background: var(--panel-2); border-radius: var(--radius); overflow: hidden; cursor: pointer; border: 0; padding: 0; }
+  .tile img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity .35s ease; }
+  .tile img.loaded { opacity: 1; }
+  .tile.new::after { content: "NEW"; position: absolute; top: 8px; left: 8px; background: var(--accent); color: var(--accent-ink);
+    font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; letter-spacing: .5px; }
+  .tile .time { position: absolute; right: 6px; bottom: 6px; font-size: 11px; color: #fff; background: rgba(0,0,0,.55); padding: 2px 6px; border-radius: 6px; }
+
+  .empty, .error { text-align: center; color: var(--muted); padding: 60px 16px; }
+  .error { color: #ff7b7b; }
+  .error code { display: block; margin-top: 10px; color: var(--muted); font-size: 12px; word-break: break-all; }
+
+  .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(20px);
+    background: var(--accent); color: var(--accent-ink); font-weight: 600; padding: 10px 16px; border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35); opacity: 0; pointer-events: none; transition: all .3s ease; z-index: 8; cursor: pointer; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+
+  /* Lightbox */
+  .lb { position: fixed; inset: 0; background: rgba(0,0,0,.96); display: none; z-index: 20; flex-direction: column; touch-action: none; }
+  .lb.open { display: flex; }
+  .lb-top { display: flex; align-items: center; gap: 8px; padding: calc(10px + env(safe-area-inset-top)) 12px 10px; color: #ddd; font-size: 13px; }
+  .lb-top .spacer { flex: 1; }
+  .ibtn { background: rgba(255,255,255,.1); border: 0; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; display: grid; place-items: center; }
+  .ibtn:hover { background: rgba(255,255,255,.2); }
+  .lb-stage { flex: 1; position: relative; display: grid; place-items: center; overflow: hidden; }
+  .lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+  .nav { position: absolute; top: 50%; transform: translateY(-50%); }
+  .nav.prev { left: 8px; } .nav.next { right: 8px; }
+  @media (max-width: 700px) { .nav { display: none; } }
+  .lb-bottom { display: flex; gap: 8px; justify-content: center; padding: 10px 12px calc(14px + env(safe-area-inset-bottom)); }
+  .abtn { background: var(--accent); color: var(--accent-ink); border: 0; padding: 10px 16px; border-radius: 999px; font-weight: 600; cursor: pointer; text-decoration: none; font-size: 14px; }
+  .abtn.ghost { background: rgba(255,255,255,.12); color: #fff; }
+  .spin { width: 28px; height: 28px; border: 3px solid rgba(255,255,255,.25); border-top-color: #fff; border-radius: 50%; animation: rot .8s linear infinite; position: absolute; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <h1 id="title">Game Highlights</h1>
+    <span class="live"><span class="dot" id="dot"></span><span id="status">connecting</span></span>
+    <span class="spacer"></span>
+    <span class="count" id="count"></span>
+  </div>
+  <div class="tabs" id="tabs" role="tablist" hidden></div>
+</header>
+
+<main>
+  <div id="grid" class="grid"></div>
+  <div id="msg"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<div class="lb" id="lb" aria-modal="true" role="dialog">
+  <div class="lb-top">
+    <span id="lbName"></span>
+    <span class="spacer"></span>
+    <span id="lbPos"></span>
+    <button class="ibtn" id="lbClose" aria-label="Close">✕</button>
+  </div>
+  <div class="lb-stage" id="stage">
+    <div class="spin" id="lbSpin"></div>
+    <img id="lbImg" alt="">
+    <button class="ibtn nav prev" id="lbPrev" aria-label="Previous">‹</button>
+    <button class="ibtn nav next" id="lbNext" aria-label="Next">›</button>
+  </div>
+  <div class="lb-bottom">
+    <a class="abtn" id="lbDownload" download target="_blank" rel="noopener">Download</a>
+    <button class="abtn ghost" id="lbShare">Share</button>
+  </div>
+</div>
+
+<script>
+/* ======================= CONFIG ======================= */
+const CONFIG = {
+  title: "Game Highlights",          // shown in the header and browser tab
+  apiKey: "PASTE_YOUR_API_KEY",      // Google Cloud API key, restricted to this site's domain
+  folderId: "1hZVm4cZfgydErYWxewfkhptXpy0poZ1o",  // GameHighlights folder in your Drive
+  tabNames: { "incoming": "Latest" },  // subfolder name -> label shown to parents
+  pollSeconds: 30,                   // how often to check for new photos
+  thumbWidth: 600,                   // thumbnail size in the grid
+  fullWidth: 2000,                   // size requested in the lightbox
+  newBadgeMinutes: 10                // tiles newer than this get a NEW badge
+};
+/* ====================================================== */
+
+const params = new URLSearchParams(location.search);
+const DEMO = params.has("demo");
+if (params.get("folder")) CONFIG.folderId = params.get("folder");
+
+const $ = (s) => document.querySelector(s);
+const grid = $("#grid"), msg = $("#msg"), tabsEl = $("#tabs"), toast = $("#toast");
+document.title = CONFIG.title; $("#title").textContent = CONFIG.title;
+
+let photos = [];           // all photos, newest first
+let folders = new Map();   // id -> name (subfolders = games)
+let activeFolder = "all";
+let known = new Set();
+let firstLoad = true;
+let pendingNew = 0;
+let timer = null;
+
+const thumbUrl = (id, w) => `https://lh3.googleusercontent.com/d/${id}=w${w}`;
+const downloadUrl = (id) => `https://drive.google.com/uc?export=download&id=${id}`;
+
+function fmtTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+function fmtDay(iso) {
+  return new Date(iso).toLocaleDateString([], { month: "short", day: "numeric" });
+}
+function setStatus(text, ok = true) {
+  $("#status").textContent = text;
+  $("#dot").classList.toggle("off", !ok);
+}
+function showError(title, detail) {
+  msg.innerHTML = `<div class="error">${title}${detail ? `<code>${detail}</code>` : ""}</div>`;
+  setStatus("offline", false);
+}
+
+async function driveList(q, fields, pageToken) {
+  const u = new URL("https://www.googleapis.com/drive/v3/files");
+  u.searchParams.set("q", q);
+  u.searchParams.set("fields", `nextPageToken,files(${fields})`);
+  u.searchParams.set("pageSize", "1000");
+  u.searchParams.set("orderBy", "createdTime desc");
+  u.searchParams.set("key", CONFIG.apiKey);
+  if (pageToken) u.searchParams.set("pageToken", pageToken);
+  const r = await fetch(u);
+  if (!r.ok) {
+    let detail = r.status + " " + r.statusText;
+    try { detail = (await r.json()).error.message; } catch {}
+    throw new Error(detail);
+  }
+  return r.json();
+}
+
+async function listAll(q, fields) {
+  let out = [], token;
+  do {
+    const page = await driveList(q, fields, token);
+    out = out.concat(page.files || []);
+    token = page.nextPageToken;
+  } while (token);
+  return out;
+}
+
+async function fetchPhotos() {
+  if (DEMO) return demoPhotos();
+  if (CONFIG.apiKey.startsWith("PASTE") || CONFIG.folderId.startsWith("PASTE")) {
+    throw new Error("Open index.html and fill in CONFIG.apiKey and CONFIG.folderId. Add ?demo to the URL to preview with sample images.");
+  }
+  // Subfolders become "games"
+  const subs = await listAll(
+    `'${CONFIG.folderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+    "id,name");
+  folders = new Map(subs.map(f => [f.id, f.name]));
+
+  const parents = [CONFIG.folderId, ...folders.keys()];
+  const parentQ = parents.map(p => `'${p}' in parents`).join(" or ");
+  const files = await listAll(
+    `(${parentQ}) and mimeType contains 'image/' and trashed = false`,
+    "id,name,createdTime,modifiedTime,parents,imageMediaMetadata(width,height)");
+  return files.map(f => ({
+    id: f.id, name: f.name,
+    time: f.createdTime,
+    folder: (f.parents || [])[0] || CONFIG.folderId,
+    w: f.imageMediaMetadata?.width, h: f.imageMediaMetadata?.height
+  }));
+}
+
+function demoPhotos() {
+  const now = Date.now();
+  const out = [];
+  for (let i = 0; i < 24; i++) {
+    out.push({ id: `demo${i}`, name: `DSC0${1000 + i}.JPG`, time: new Date(now - i * 97000).toISOString(),
+      folder: i % 3 === 0 ? "g2" : "g1", demo: `https://picsum.photos/seed/hl${i}/900/600` });
+  }
+  folders = new Map([["g1", "vs Lincoln"], ["g2", "vs Central"]]);
+  return out;
+}
+
+function renderTabs() {
+  if (folders.size === 0) { tabsEl.hidden = true; return; }
+  tabsEl.hidden = false;
+  const label = (n) => (CONFIG.tabNames || {})[n.toLowerCase()] || CONFIG.tabNames?.[n] || n;
+  const subs = [...folders].map(([id, n]) => [id, label(n)]);
+  // Put the live/incoming tab right after "All", the rest alphabetical
+  subs.sort((a, b) => (a[1] === "Latest" ? -1 : b[1] === "Latest" ? 1 : a[1].localeCompare(b[1])));
+  const items = [["all", "All"], ...subs];
+  tabsEl.innerHTML = items.map(([id, name]) =>
+    `<button class="tab" role="tab" data-id="${id}" aria-selected="${id === activeFolder}">${name}</button>`).join("");
+}
+tabsEl.addEventListener("click", (e) => {
+  const b = e.target.closest(".tab"); if (!b) return;
+  activeFolder = b.dataset.id; renderTabs(); renderGrid();
+});
+
+function visible() {
+  return activeFolder === "all" ? photos : photos.filter(p => p.folder === activeFolder);
+}
+
+function tileFor(p) {
+  const b = document.createElement("button");
+  b.className = "tile"; b.dataset.id = p.id;
+  const isNew = (Date.now() - new Date(p.time)) < CONFIG.newBadgeMinutes * 60000;
+  if (isNew) b.classList.add("new");
+  const img = document.createElement("img");
+  img.loading = "lazy"; img.alt = p.name;
+  img.src = p.demo || thumbUrl(p.id, CONFIG.thumbWidth);
+  img.onload = () => img.classList.add("loaded");
+  const t = document.createElement("span"); t.className = "time"; t.textContent = fmtTime(p.time);
+  b.append(img, t);
+  b.addEventListener("click", () => openLightbox(p.id));
+  return b;
+}
+
+function renderGrid() {
+  const list = visible();
+  grid.innerHTML = "";
+  msg.innerHTML = "";
+  if (list.length === 0) {
+    msg.innerHTML = `<div class="empty">No photos yet. They'll appear here as soon as they're sent from the camera.</div>`;
+  }
+  const frag = document.createDocumentFragment();
+  list.forEach(p => frag.appendChild(tileFor(p)));
+  grid.appendChild(frag);
+  $("#count").textContent = list.length ? `${list.length} photo${list.length === 1 ? "" : "s"}` : "";
+}
+
+function prependNew(newOnes) {
+  // Insert new tiles at the top without re-rendering everything
+  const list = newOnes.filter(p => activeFolder === "all" || p.folder === activeFolder);
+  if (list.length === 0) return;
+  msg.innerHTML = "";
+  list.slice().reverse().forEach(p => grid.prepend(tileFor(p)));
+  const total = visible().length;
+  $("#count").textContent = `${total} photo${total === 1 ? "" : "s"}`;
+}
+
+function showToast(n) {
+  toast.textContent = `${n} new photo${n === 1 ? "" : "s"}`;
+  toast.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => toast.classList.remove("show"), 4000);
+}
+toast.addEventListener("click", () => { window.scrollTo({ top: 0, behavior: "smooth" }); toast.classList.remove("show"); });
+
+async function refresh() {
+  try {
+    setStatus(firstLoad ? "loading" : "live");
+    const fresh = await fetchPhotos();
+    fresh.sort((a, b) => new Date(b.time) - new Date(a.time));
+    const newOnes = fresh.filter(p => !known.has(p.id));
+    const prevFolderCount = folders.size;
+
+    if (firstLoad) {
+      photos = fresh; fresh.forEach(p => known.add(p.id));
+      renderTabs(); renderGrid(); firstLoad = false;
+    } else if (newOnes.length) {
+      newOnes.forEach(p => known.add(p.id));
+      photos = fresh;
+      if (folders.size !== prevFolderCount) renderTabs();
+      if (window.scrollY < 200) {
+        prependNew(newOnes);
+      } else {
+        // user is reading further down: don't shove the grid, just tell them
+        prependNew(newOnes);
+        showToast(newOnes.length);
+      }
+    } else if (fresh.length !== photos.length) {
+      photos = fresh; renderGrid(); // something was deleted
+    }
+    setStatus(`live · ${new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`);
+  } catch (e) {
+    showError(firstLoad ? "Could not load the gallery." : "Lost connection. Retrying…", e.message);
+  }
+}
+
+function schedule() {
+  clearInterval(timer);
+  timer = setInterval(() => { if (document.visibilityState === "visible") refresh(); }, CONFIG.pollSeconds * 1000);
+}
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
+
+/* ---------------- Lightbox ---------------- */
+const lb = $("#lb"), lbImg = $("#lbImg"), lbSpin = $("#lbSpin");
+let lbIndex = -1;
+
+function openLightbox(id) {
+  const list = visible();
+  lbIndex = list.findIndex(p => p.id === id);
+  if (lbIndex < 0) return;
+  lb.classList.add("open"); document.body.style.overflow = "hidden";
+  showLb();
+  history.pushState({ lb: true }, "");
+}
+function closeLightbox(fromPop) {
+  lb.classList.remove("open"); document.body.style.overflow = "";
+  lbImg.removeAttribute("src");
+  if (!fromPop && history.state?.lb) history.back();
+}
+function showLb() {
+  const list = visible(); const p = list[lbIndex]; if (!p) return;
+  lbSpin.style.display = "block"; lbImg.style.opacity = ".25";
+  lbImg.src = p.demo ? p.demo.replace("/900/600", "/1800/1200") : thumbUrl(p.id, CONFIG.fullWidth);
+  lbImg.onload = () => { lbSpin.style.display = "none"; lbImg.style.opacity = "1"; };
+  $("#lbName").textContent = `${fmtDay(p.time)} · ${fmtTime(p.time)}`;
+  $("#lbPos").textContent = `${lbIndex + 1} / ${list.length}`;
+  $("#lbDownload").href = p.demo || downloadUrl(p.id);
+  $("#lbDownload").setAttribute("download", p.name);
+  // Preload neighbours
+  [lbIndex - 1, lbIndex + 1].forEach(i => { const n = list[i]; if (n && !n.demo) { const im = new Image(); im.src = thumbUrl(n.id, CONFIG.fullWidth); } });
+}
+function step(d) {
+  const list = visible();
+  lbIndex = (lbIndex + d + list.length) % list.length; showLb();
+}
+$("#lbClose").onclick = () => closeLightbox();
+$("#lbPrev").onclick = () => step(-1);
+$("#lbNext").onclick = () => step(1);
+$("#lbShare").onclick = async () => {
+  const p = visible()[lbIndex]; if (!p) return;
+  const url = p.demo || `https://drive.google.com/file/d/${p.id}/view`;
+  if (navigator.share) { try { await navigator.share({ title: CONFIG.title, url }); } catch {} }
+  else { await navigator.clipboard.writeText(url); showToast(0); toast.textContent = "Link copied"; }
+};
+window.addEventListener("popstate", () => { if (lb.classList.contains("open")) closeLightbox(true); });
+document.addEventListener("keydown", (e) => {
+  if (!lb.classList.contains("open")) return;
+  if (e.key === "Escape") closeLightbox();
+  if (e.key === "ArrowLeft") step(-1);
+  if (e.key === "ArrowRight") step(1);
+});
+// Swipe
+let sx = 0, sy = 0;
+$("#stage").addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+$("#stage").addEventListener("touchend", (e) => {
+  const dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+  else if (dy > 90 && Math.abs(dx) < 60) closeLightbox();
+});
+$("#stage").addEventListener("click", (e) => { if (e.target === $("#stage")) closeLightbox(); });
+
+refresh().then(schedule);
+</script>
+</body>
+</html>
