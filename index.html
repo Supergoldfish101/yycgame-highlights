@@ -215,11 +215,12 @@ async function fetchPhotos() {
     "id,name");
   folders = new Map(subs.map(f => [f.id, f.name]));
 
+  // One query per folder: the Drive API refuses an OR across parents under key-only auth
   const parents = [CONFIG.folderId, ...folders.keys()];
-  const parentQ = parents.map(p => `'${p}' in parents`).join(" or ");
-  const files = await listAll(
-    `(${parentQ}) and mimeType contains 'image/' and trashed = false`,
-    "id,name,createdTime,modifiedTime,parents,imageMediaMetadata(width,height)");
+  const perFolder = await Promise.all(parents.map(p => listAll(
+    `'${p}' in parents and mimeType contains 'image/' and trashed = false`,
+    "id,name,createdTime,modifiedTime,parents,imageMediaMetadata(width,height)")));
+  const files = perFolder.flat();
   return files.map(f => ({
     id: f.id, name: f.name,
     time: f.createdTime,
