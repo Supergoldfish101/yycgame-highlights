@@ -1076,10 +1076,19 @@
     overflow: hidden;
     padding: 12px;
   }
+  html.lb-open, html.lb-open body { overflow: hidden !important; overscroll-behavior: none; }
+  .lb { overscroll-behavior: contain; }
+  .lb-stage { cursor: zoom-in; }
+  .lb-stage.zoomed { cursor: grab; }
+  .lb-stage.zoomed.dragging { cursor: grabbing; }
   .lb-stage img {
     width: 100%;
     height: 100%;           /* fill the stage; contain letterboxes inside it */
     min-height: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+    touch-action: none;
+    pointer-events: none;   /* the stage handles all pointer input */
     object-fit: contain;
     user-select: none;
     -webkit-user-drag: none;
@@ -1471,6 +1480,12 @@
       </svg>
       Download
     </a>
+    <button class="abtn ghost" id="lbZoom" type="button" aria-label="Toggle zoom">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+      </svg>
+      <span id="lbZoomLabel">Zoom</span>
+    </button>
     <button class="abtn ghost" id="lbShare" type="button">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="18" cy="5" r="3"/>
@@ -1918,6 +1933,7 @@ function openLightbox(id) {
   if (lbIndex < 0) return;
   lb.classList.add("open");
   document.body.style.overflow = "hidden";
+  document.documentElement.classList.add("lb-open");
   showLb();
   history.pushState({ lb: true }, "");
 }
@@ -1925,6 +1941,8 @@ function openLightbox(id) {
 function closeLightbox(fromPop) {
   lb.classList.remove("open");
   document.body.style.overflow = "";
+  document.documentElement.classList.remove("lb-open");
+  zoomReset();
   lbImg.removeAttribute("src");
   if (!fromPop && history.state?.lb) history.back();
 }
@@ -1933,6 +1951,7 @@ function showLb() {
   const list = visible();
   const p = list[lbIndex];
   if (!p) return;
+  zoomReset();
   lbSpin.style.display = "block";
   lbImg.style.opacity = ".25";
   lbImg.src = p.demo ? p.demo.replace(/\/(\d+)\/(\d+)$/, (m, w, h) => `/${w * 2}/${h * 2}`) : thumbUrl(p.id, CONFIG.fullWidth);
@@ -1997,20 +2016,124 @@ document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight") step(1);
 });
 
-// Swipe
-let sx = 0, sy = 0;
-$("#stage").addEventListener("touchstart", (e) => {
-  sx = e.touches[0].clientX;
-  sy = e.touches[0].clientY;
-}, { passive: true });
-$("#stage").addEventListener("touchend", (e) => {
-  const dx = e.changedTouches[0].clientX - sx;
-  const dy = e.changedTouches[0].clientY - sy;
-  if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
-  else if (dy > 90 && Math.abs(dx) < 60) closeLightbox();
+// ---------- Zoom, pan and swipe (pointer events: mouse, touch, pen) ----------
+const stage = $("#stage");
+const Z = { scale: 1, tx: 0, ty: 0, min: 1, max: 5 };
+const pointers = new Map();
+let pinchStart = null, dragStart = null, moved = false, lastTap = 0;
+
+function zoomApply() {
+  lbImg.style.transform = `translate(${Z.tx}px, ${Z.ty}px) scale(${Z.scale})`;
+  stage.classList.toggle("zoomed", Z.scale > 1.01);
+  $("#lbZoomLabel").textContent = Z.scale > 1.01 ? `${Z.scale.toFixed(1)}×` : "Zoom";
+}
+function zoomReset() { Z.scale = 1; Z.tx = 0; Z.ty = 0; zoomApply(); }
+
+// Keep the picture covering the stage: no dragging it off into the void
+function zoomClamp() {
+  const r = stage.getBoundingClientRect();
+  const w = r.width * Z.scale, h = r.height * Z.scale;
+  const minX = Math.min(0, r.width - w), minY = Math.min(0, r.height - h);
+  Z.tx = Math.max(minX, Math.min(0, Z.tx));
+  Z.ty = Math.max(minY, Math.min(0, Z.ty));
+}
+
+// Zoom so the point under (cx, cy) in stage coordinates stays put
+function zoomTo(scale, cx, cy) {
+  scale = Math.max(Z.min, Math.min(Z.max, scale));
+  const k = scale / Z.scale;
+  Z.tx = cx - (cx - Z.tx) * k;
+  Z.ty = cy - (cy - Z.ty) * k;
+  Z.scale = scale;
+  if (Z.scale <= 1.001) { Z.scale = 1; Z.tx = 0; Z.ty = 0; } else zoomClamp();
+  zoomApply();
+}
+function stagePoint(e) {
+  const r = stage.getBoundingClientRect();
+  return [e.clientX - r.left, e.clientY - r.top];
+}
+function zoomToggle(cx, cy) {
+  if (cx === undefined) { const r = stage.getBoundingClientRect(); cx = r.width / 2; cy = r.height / 2; }
+  zoomTo(Z.scale > 1.01 ? 1 : 2.5, cx, cy);
+}
+
+// Mouse wheel / trackpad: zoom around the cursor; never scroll the page
+lb.addEventListener("wheel", (e) => {
+  e.preventDefault();
+  if (!lb.classList.contains("open")) return;
+  const [cx, cy] = stagePoint(e);
+  const factor = Math.exp(-e.deltaY * 0.0022);
+  zoomTo(Z.scale * factor, cx, cy);
+}, { passive: false });
+
+stage.addEventListener("pointerdown", (e) => {
+  if (e.target.closest(".nav")) return;
+  stage.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  moved = false;
+  if (pointers.size === 1) {
+    dragStart = { x: e.clientX, y: e.clientY, tx: Z.tx, ty: Z.ty };
+    if (Z.scale > 1.01) stage.classList.add("dragging");
+  } else if (pointers.size === 2) {
+    const [a, b] = [...pointers.values()];
+    pinchStart = { dist: Math.hypot(a.x - b.x, a.y - b.y), scale: Z.scale };
+    dragStart = null;
+  }
 });
-$("#stage").addEventListener("click", (e) => {
-  if (e.target === $("#stage")) closeLightbox();
+
+stage.addEventListener("pointermove", (e) => {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (pointers.size === 2 && pinchStart) {
+    const [a, b] = [...pointers.values()];
+    const dist = Math.hypot(a.x - b.x, a.y - b.y);
+    const r = stage.getBoundingClientRect();
+    zoomTo(pinchStart.scale * (dist / pinchStart.dist), (a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top);
+    moved = true;
+  } else if (pointers.size === 1 && dragStart && Z.scale > 1.01) {
+    Z.tx = dragStart.tx + (e.clientX - dragStart.x);
+    Z.ty = dragStart.ty + (e.clientY - dragStart.y);
+    zoomClamp(); zoomApply();
+    if (Math.hypot(e.clientX - dragStart.x, e.clientY - dragStart.y) > 4) moved = true;
+  }
+});
+
+function pointerEnd(e) {
+  if (!pointers.has(e.pointerId)) return;
+  pointers.delete(e.pointerId);
+  stage.classList.remove("dragging");
+  if (pointers.size > 0) { pinchStart = null; dragStart = null; return; }
+
+  const wasPinch = !!pinchStart;
+  pinchStart = null;
+  if (wasPinch || !dragStart) { dragStart = null; return; }
+  const dx = e.clientX - dragStart.x, dy = e.clientY - dragStart.y;
+  dragStart = null;
+
+  if (Z.scale <= 1.01 && !moved && e.pointerType === "touch") {
+    // Unzoomed swipe: left/right = next/prev, down = close
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { step(dx < 0 ? 1 : -1); return; }
+    if (dy > 90 && Math.abs(dx) < 60) { closeLightbox(); return; }
+  }
+  if (!moved && Math.hypot(dx, dy) < 6) {
+    // Tap / click: double = zoom toggle, single on the backdrop = close
+    const now = Date.now();
+    if (now - lastTap < 320) { lastTap = 0; zoomToggle(...stagePoint(e)); return; }
+    lastTap = now;
+    if (e.target === stage && Z.scale <= 1.01) {
+      setTimeout(() => { if (lastTap === now) closeLightbox(); }, 330);
+    }
+  }
+}
+stage.addEventListener("pointerup", pointerEnd);
+stage.addEventListener("pointercancel", pointerEnd);
+stage.addEventListener("dblclick", (e) => e.preventDefault());
+$("#lbZoom").onclick = () => zoomToggle();
+
+document.addEventListener("keydown", (e) => {
+  if (!lb.classList.contains("open")) return;
+  if (e.key === "+" || e.key === "=") zoomToggle();
+  if (e.key === "-" || e.key === "0") zoomReset();
 });
 
 refresh().then(schedule);
