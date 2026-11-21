@@ -1077,7 +1077,7 @@
     padding: 12px;
   }
   html.lb-open, html.lb-open body { overflow: hidden !important; overscroll-behavior: none; }
-  .lb { overscroll-behavior: contain; }
+  .lb { overscroll-behavior: contain; user-select: none; -webkit-user-select: none; }
   .lb-stage { cursor: zoom-in; }
   .lb-stage.zoomed { cursor: grab; }
   .lb-stage.zoomed.dragging { cursor: grabbing; }
@@ -2290,6 +2290,20 @@ function pointerEnd(e) {
 stage.addEventListener("pointerup", pointerEnd);
 stage.addEventListener("pointercancel", pointerEnd);
 stage.addEventListener("dblclick", (e) => e.preventDefault());
+// Some browsers start a native image drag or a text selection on mousedown, which
+// swallows the rest of the gesture. Kill both inside the viewer.
+lb.addEventListener("dragstart", (e) => e.preventDefault());
+lb.addEventListener("selectstart", (e) => e.preventDefault());
+stage.addEventListener("pointerdown", (e) => { if (e.pointerType === "mouse") e.preventDefault(); });
+// Mouse pans that leave the stage (fast drags, capture not honoured) still finish cleanly
+window.addEventListener("pointermove", (e) => {
+  if (e.pointerType !== "mouse" || !dragStart || !pointers.has(e.pointerId) || Z.scale <= 1.01) return;
+  if (e.target === stage || stage.contains(e.target)) return; // stage handler already ran
+  stage.dispatchEvent(new PointerEvent("pointermove", e));
+});
+window.addEventListener("pointerup", (e) => {
+  if (pointers.has(e.pointerId) && !(e.target === stage || stage.contains(e.target))) pointerEnd(e);
+});
 $("#lbZoom").onclick = () => zoomToggle();
 
 document.addEventListener("keydown", (e) => {
