@@ -2172,12 +2172,8 @@ function zoomReset() { Z.scale = 1; Z.tx = 0; Z.ty = 0; zoomApply(); }
 
 // The picture's layout box inside the stage (before any transform)
 function box() { return { ox: lbImg.offsetLeft, oy: lbImg.offsetTop, w: lbImg.offsetWidth || 1, h: lbImg.offsetHeight || 1 }; }
-// Max zoom: about 1.5x the file's real pixels, never less than 2x, never more than 6x
-function maxScale() {
-  const b = box();
-  const onePx = lbImg.naturalWidth ? lbImg.naturalWidth / b.w : 2;
-  return Math.min(6, Math.max(2, onePx * 1.5));
-}
+// Max zoom: a flat 5x
+function maxScale() { return Z.max; }
 
 // Keep the picture covering the stage where it's bigger, centred where it's smaller
 function zoomClamp() {
