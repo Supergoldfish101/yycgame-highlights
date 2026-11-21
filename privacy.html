@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · Fishbowl Photography</title>
+<link rel="icon" type="image/svg+xml" href="./assets/favicon.svg">
+<style>
+  :root { --bg:#090b10; --surface:#11151e; --text:#f4f6fa; --muted:#94a0b8; --accent:#ffb020; --border:rgba(255,255,255,.09); }
+  @media (prefers-color-scheme: light) { :root { --bg:#f4f6fa; --surface:#fff; --text:#0f131a; --muted:#5a6478; --border:rgba(15,19,26,.11); } }
+  body { margin:0; background:var(--bg); color:var(--text); font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:48px 20px 64px; }
+  .brand { font-weight:900; letter-spacing:.14em; font-size:22px; }
+  .brand small { display:block; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10px; letter-spacing:.32em; color:var(--accent); font-weight:400; }
+  h1 { font-size:28px; margin:28px 0 8px; }
+  h2 { font-size:17px; margin:28px 0 6px; }
+  p, li { color:var(--muted); }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:20px 22px; margin-top:20px; }
+  a { color:var(--accent); }
+  .meta { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">FISHBOWL<small>PHOTOGRAPHY</small></div>
+  <h1>Privacy policy</h1>
+  <p class="meta">Applies to the Fishbowl Relay app and the live gallery at yycgame.l33.ca · Updated November 2026</p>
+
+  <div class="card">
+    <h2>What Fishbowl Relay is</h2>
+    <p>Fishbowl Relay is a private Android app used by Fishbowl Photography to move photos from a camera to a Google Drive folder, adding a watermark on the way. It is installed only on the photographer's own phone and signs in only to the photographer's own Google account.</p>
+
+    <h2>What it accesses in Google Drive</h2>
+    <p>The app requests the <code>drive.file</code> permission. That lets it create one folder in the signed-in account's Drive and upload photos into it. It cannot see, read, change or delete any other file in that Drive.</p>
+
+    <h2>What is shared</h2>
+    <p>The folder the app creates is shared as "anyone with the link can view" so that the live gallery page can display the photos. The gallery is a static web page that reads that folder through Google's public Drive API. No one other than Google receives the photos.</p>
+
+    <h2>What is collected</h2>
+    <ul>
+      <li>No analytics, advertising identifiers, or tracking of any kind, in the app or on the gallery.</li>
+      <li>No personal data is sent to Fishbowl Photography or any third party. Google's own processing of Drive files is covered by <a href="https://policies.google.com/privacy" rel="noopener">Google's privacy policy</a>.</li>
+      <li>The gallery remembers a viewer's light or dark theme choice in their own browser only.</li>
+    </ul>
+
+    <h2>Removing access</h2>
+    <p>Access granted to the app can be revoked at any time from <a href="https://myaccount.google.com/permissions" rel="noopener">Google account permissions</a>. Deleting the Drive folder removes all uploaded photos.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy or about any photo in the gallery: <a href="mailto:david@l33.ca">david@l33.ca</a>.</p>
+  </div>
+</main>
+</body>
+</html>
